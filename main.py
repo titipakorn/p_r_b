@@ -1,6 +1,6 @@
 import os
 from typing import List
-from pydantic import BaseModel
+from pydantic import Body
 import logging
 
 
