@@ -1,10 +1,10 @@
 import os
-from typing import List
+from typing import Any
 import logging
 
 
 # API
-from fastapi import FastAPI, File, UploadFile, Body, Any
+from fastapi import FastAPI, File, UploadFile, Body
 from fastapi.responses import HTMLResponse
 
 # CONFIG
