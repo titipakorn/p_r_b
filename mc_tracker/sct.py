@@ -22,8 +22,12 @@ from scipy.spatial.distance import cosine, cdist
 
 from PIL import Image
 
+import torch
+
 from utils.misc import none_to_zero
 from shapely.geometry import Polygon, Point
+
+from torchvision import transforms
 
 THE_BIGGEST_DISTANCE = 10.
 
@@ -122,6 +126,13 @@ class SingleCameraTracker:
         self.max_bbox_velocity = max_bbox_velocity
         self.detection_occlusion_thresh = detection_occlusion_thresh
         self.track_detection_iou_thresh = track_detection_iou_thresh
+        self.data_transform = transforms.Compose([
+            transforms.Resize([256, 128]),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[
+                                 0.229, 0.224, 0.225]),
+
+        ])
 
     def process(self, images, detections, mask=None):
         reid_features = [None]*len(images)
@@ -438,9 +449,11 @@ class SingleCameraTracker:
         embeddings = []
         if images:
             for image in images:
-                img = np.array(Image.open(image.file).convert(
-                    'RGB').resize((128, 256)))
-                embeddings.append(self.reid_model.forward(img))
+                img = self.data_transform(Image.open(image.file).convert(
+                    'RGB'))
+                with torch.no_grad():
+                    img = img.to("cuda")
+                    embeddings.append(self.reid_model.forward(img))
         return embeddings
 
     def _merge_clustered_features(self, clusters1, clusters2, features1, features2):

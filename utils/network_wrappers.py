@@ -31,5 +31,6 @@ class VectorCNN:
 
     def forward(self, img):
         """Performs forward of the underlying network on a given batch"""
-        img = torch.from_numpy(img).float().to(self.device)
+        #img = torch.from_numpy(img).float().to(self.device)
+
         return self.model(img)
