@@ -84,7 +84,8 @@ def convert_polygon(json):
     y = []
     for i in json:
         # 320,544
-        y.append(tuple((i["x"]*(320/1280), i["y"]*(544/720))))
+        #y.append(tuple((i["x"]*(320/1280), i["y"]*(544/720))))
+        y.append(tuple((i["x"], i["y"])))
     return y
 
 
@@ -437,7 +438,8 @@ class SingleCameraTracker:
         embeddings = []
         if images:
             for image in images:
-                img = np.array(Image.open(image.file).convert('RGB'))
+                img = np.array(Image.open(image.file).convert(
+                    'RGB').resize(128, 256))
                 embeddings.append(self.reid_model.forward(img))
         return embeddings
 
