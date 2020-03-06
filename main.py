@@ -29,10 +29,6 @@ reid = VectorCNN(config)
 tracker = MultiCameraTracker(number_of_cameras, reid, config)
 
 
-class Data(BaseModel):
-    bboxes: Any
-
-
 @app.get("/status/")
 def read_status():
     return {"counting_in": SingleCameraTracker.COUNT_IN, "counting_out": SingleCameraTracker.COUNT_OUT}
