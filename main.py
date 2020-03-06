@@ -4,7 +4,7 @@ import logging
 
 
 # API
-from fastapi import FastAPI, File, UploadFile, Body
+from fastapi import FastAPI, File, UploadFile, Body, Any
 from fastapi.responses import HTMLResponse
 
 # CONFIG
