@@ -1,5 +1,6 @@
 import os
 from typing import Any, List
+from pydantic import BaseModel
 import logging
 
 
@@ -28,8 +29,8 @@ reid = VectorCNN(config)
 tracker = MultiCameraTracker(number_of_cameras, reid, config)
 
 
-# class Data(BaseModel):
-#     bboxes: List[List[float]]
+class Data(BaseModel):
+    bboxes: Any
 
 
 @app.get("/status/")
@@ -38,8 +39,8 @@ def read_status():
 
 
 @app.post("/track/")
-async def update_track(body: Any = Body(...), files: List[UploadFile] = File(...)):
-    logger.debug(body)
+async def update_track(data: Data, files: List[UploadFile] = File(...)):
+    logger.debug(data)
     logger.debug(files)
     #tracker.process([files], [bboxes])
     return {"status": 'success'}
