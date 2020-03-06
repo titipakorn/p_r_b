@@ -1,11 +1,10 @@
 import os
 from typing import List
-from pydantic import Body
 import logging
 
 
 # API
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Body
 from fastapi.responses import HTMLResponse
 
 # CONFIG
