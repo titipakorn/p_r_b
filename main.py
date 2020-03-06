@@ -1,6 +1,8 @@
 import os
 from typing import List
 from pydantic import BaseModel
+import logging
+
 
 # API
 from fastapi import FastAPI, File, UploadFile
@@ -14,6 +16,7 @@ from mc_tracker.sct import SingleCameraTracker
 # REID_MODEL
 from utils.network_wrappers import VectorCNN
 
+logger = logging.getLogger("api")
 
 config = Config()
 os.environ['CUDA_VISIBLE_DEVICES'] = config.DEVICE_ID
@@ -37,6 +40,7 @@ def read_status():
 
 @app.post("/track/")
 async def update_track(bboxes: List[List[int]], files: List[UploadFile] = File(...)):
+    logger.debug(bboxes)
     tracker.process([files], [bboxes])
     return {"status": 'success'}
 
