@@ -27,7 +27,7 @@ class Config(DefaultConfig):
         self.CFG_NAME = 'baseline'
         self.DATA_DIR = '/nfs/public/datasets/person_reid/Market-1501-v15.09.15'
         self.PRETRAIN_CHOICE = 'imagenet'
-        self.PRETRAIN_PATH = '/nfs/public/pretrained_models/resnet50-19c8e357.pth'
+        self.PRETRAIN_PATH = './models/resnet50-19c8e357.pth'
 
         self.LOSS_TYPE = 'triplet+softmax+center'
         self.TEST_WEIGHT = './models/resnet50_person_reid_128x64.pth'
