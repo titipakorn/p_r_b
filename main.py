@@ -39,8 +39,8 @@ def read_status():
 
 
 @app.post("/track/")
-async def update_track(data: Data, files: List[UploadFile] = File(...)):
-    logger.debug(data)
+async def update_track(bboxes: Any = Body(..., embed=True), files: List[UploadFile] = File(...)):
+    logger.debug(bboxes)
     logger.debug(files)
     #tracker.process([files], [bboxes])
     return {"status": 'success'}
