@@ -1,5 +1,5 @@
 import os
-from typing import Any, List
+from typing import List
 from pydantic import BaseModel
 import logging
 
@@ -39,7 +39,7 @@ def read_status():
 
 
 @app.post("/track/")
-async def update_track(bboxes: Any = Body(..., embed=True), files: List[UploadFile] = File(...)):
+async def update_track(bboxes: List = Body(...), files: List[UploadFile] = File(...)):
     logger.debug(bboxes)
     logger.debug(files)
     #tracker.process([files], [bboxes])
