@@ -37,7 +37,7 @@ def read_status():
 
 @app.post("/track/")
 async def update_track(bboxes: List[List[int]], files: List[UploadFile] = File(...)):
-    tracker.process([files], [data.bboxes])
+    tracker.process([files], [bboxes])
     return {"status": 'success'}
 
 
