@@ -20,6 +20,8 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cosine, cdist
 
+from PIL import Image
+
 from utils.misc import none_to_zero
 from shapely.geometry import Polygon, Point
 
@@ -435,7 +437,8 @@ class SingleCameraTracker:
         embeddings = []
         if images:
             for image in images:
-                embeddings.append(self.reid_model.forward(image))
+                img = Image.open(image.file)
+                embeddings.append(self.reid_model.forward(img))
         return embeddings
 
     def _merge_clustered_features(self, clusters1, clusters2, features1, features2):

@@ -2,6 +2,7 @@ import os
 from typing import List
 from pydantic import BaseModel
 import logging
+import json
 
 
 # API
@@ -35,10 +36,8 @@ def read_status():
 
 
 @app.post("/track/")
-async def update_track(bboxes: List = Body(..., embed=True), files: List[UploadFile] = File(...)):
-    logger.debug(bboxes)
-    logger.debug(files)
-    #tracker.process([files], [bboxes])
+async def update_track(bboxes: str = Body(..., embed=True), files: List[UploadFile] = File(...)):
+    tracker.process([files], [json.loads(bboxes)])
     return {"status": 'success'}
 
 
