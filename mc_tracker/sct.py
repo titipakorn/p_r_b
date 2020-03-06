@@ -437,7 +437,7 @@ class SingleCameraTracker:
         embeddings = []
         if images:
             for image in images:
-                img = np.array(Image.open(image.file))
+                img = np.array(Image.open(image.file).convert('RGB'))
                 embeddings.append(self.reid_model.forward(img))
         return embeddings
 
