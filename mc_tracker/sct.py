@@ -454,6 +454,7 @@ class SingleCameraTracker:
             for image in images:
                 img = Image.open(image.file).convert(
                     'RGB')
+                img = np.array(img)
                 with torch.no_grad():
                     img = torch.cat(
                         [self.data_transform(_resize(img, (128, 64))).unsqueeze(0)], dim=0).float().to("cuda")
