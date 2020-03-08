@@ -127,7 +127,7 @@ class SingleCameraTracker:
         self.detection_occlusion_thresh = detection_occlusion_thresh
         self.track_detection_iou_thresh = track_detection_iou_thresh
         self.data_transform = transforms.Compose([
-            transforms.Resize([256, 128]),
+            transforms.Resize([128, 64]),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[
                                  0.229, 0.224, 0.225]),
@@ -446,18 +446,15 @@ class SingleCameraTracker:
         return intersecion / m if m > 0 else 0
 
     def _get_embeddings(self, images, mask=None):
-        def _resize(im, size):
-            return cv2.resize(im.astype(np.float32)/255., size)
 
         embeddings = []
         if images:
             for image in images:
                 img = Image.open(image.file).convert(
                     'RGB')
-                img = np.array(img)
                 with torch.no_grad():
                     img = torch.cat(
-                        [self.data_transform(_resize(img, (128, 64))).unsqueeze(0)], dim=0).float().to("cuda")
+                        [self.data_transform(img).unsqueeze(0)], dim=0).float().to("cuda")
                     embeddings.append(self.reid_model.forward(img))
         return embeddings
 
