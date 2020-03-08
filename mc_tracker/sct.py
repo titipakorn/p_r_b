@@ -455,9 +455,9 @@ class SingleCameraTracker:
                 img = Image.open(image.file).convert(
                     'RGB')
                 with torch.no_grad():
-                    img = img.to("cuda")
-                    embeddings.append(self.reid_model.forward(torch.cat(
-                        [self.data_transform(_resize(img, (128, 64))).unsqueeze(0)], dim=0).float()))
+                    img = torch.cat(
+                        [self.data_transform(_resize(img, (128, 64))).unsqueeze(0)], dim=0).float().to("cuda")
+                    embeddings.append(self.reid_model.forward(img))
         return embeddings
 
     def _merge_clustered_features(self, clusters1, clusters2, features1, features2):
