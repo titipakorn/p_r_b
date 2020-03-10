@@ -88,7 +88,7 @@ def convert_polygon(json):
     y = []
     for i in json:
         # 320,544
-        #y.append(tuple((i["x"]*(320/1280), i["y"]*(544/720))))
+        # y.append(tuple((i["x"]*(320/1280), i["y"]*(544/720))))
         y.append(tuple((i["x"], i["y"])))
     return y
 
@@ -446,14 +446,19 @@ class SingleCameraTracker:
         return intersecion / m if m > 0 else 0
 
     def _get_embeddings(self, images, mask=None):
-        if images:
-            with torch.no_grad():
-                img = torch.cat(
-                    [self.data_transform(Image.open(img.file).convert(
-                        'RGB')).unsqueeze(0) for img in images], dim=0).float().to("cuda")
-                embeddings = self.reid_model.forward(img)
-        else:
-            embeddings = np.array([])
+        embeddings = []
+        # if images:
+        with torch.no_grad():
+            for im in images:
+                img = torch.cat([self.data_transform(Image.open(im.file).convert(
+                    'RGB')).unsqueeze(0)], dim=0).float().to("cuda")
+                embeddings.append(self.reid_model.forward(img))
+            # img = torch.cat(
+            #     [self.data_transform(Image.open(img.file).convert(
+            #         'RGB')).unsqueeze(0) for img in images], dim=0).float().to("cuda")
+            # embeddings = self.reid_model.forward(img)
+        # else:
+        #     embeddings = np.array([])
         return embeddings
 
     def _merge_clustered_features(self, clusters1, clusters2, features1, features2):
