@@ -43,9 +43,7 @@ def update_db():
     try:
         global parsed_date, parsed_time
         d, t = datetime.now().strftime("%Y-%m-%d/%H:00:00").split('/')
-        print(d, t, parsed_date, parsed_time)
         if(t != parsed_time):
-            print('POST UPDATE')
             url = 'http://52.74.221.188/api/insert.php'
             myobj = {'secure_code': (None, 'P4ssw0rd!'),
                      'sql': (None, json.dumps({'table': 'counting', 'values': {'counting_date': parsed_date, 'counting_time': parsed_time, 'counting_in': SingleCameraTracker.COUNT_IN, 'counting_out': SingleCameraTracker.COUNT_OUT, 'branch_id': 2}}))}
@@ -60,14 +58,15 @@ def update_db():
 
 
 global parsed_date, parsed_time
+parsed_date, parsed_time = datetime.now().strftime("%Y-%m-%d/%H:00:00").split('/')
 timer = RepeatTimer(60, update_db)
 timer.start()
-parsed_date, parsed_time = datetime.now().strftime("%Y-%m-%d/%H:00:00").split('/')
 
 
 @app.get("/status/")
 def read_status():
-    return {"counting_in": SingleCameraTracker.COUNT_IN, "counting_out": SingleCameraTracker.COUNT_OUT}
+    global parsed_date, parsed_time
+    return {"counting_in": SingleCameraTracker.COUNT_IN, "counting_out": SingleCameraTracker.COUNT_OUT, "date": parsed_date, "time": parsed_time}
 
 
 @app.post("/track/")
