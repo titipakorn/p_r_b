@@ -79,7 +79,7 @@ async def update_track(bboxes: str = Body(..., embed=True), files: List[UploadFi
     time_str = time.strftime(TIME_FM)
     d_bboxes = json.loads(bboxes)
     for i, f in enumerate(files):
-        b_name = "_".join(d_bboxes[i])
+        b_name = "_".join(map(str, d_bboxes[i]))
         Image.open(f.file).save(f"raw_data/{time_str}_{b_name}.jpg")
     tracker.process([files], [d_bboxes])
     return {"status": 'success'}
