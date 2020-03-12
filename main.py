@@ -6,7 +6,8 @@ import json
 import requests
 from datetime import datetime
 from threading import Timer
-
+import time
+from PIL import Image
 
 # API
 from fastapi import FastAPI, File, UploadFile, Body
@@ -62,6 +63,10 @@ parsed_date, parsed_time = datetime.now().strftime("%Y-%m-%d/%H:00:00").split('/
 timer = RepeatTimer(60, update_db)
 timer.start()
 
+TIME_FM = '-%Y%m%d-%H%M%S'
+if not os.path.exists('./raw_data'):
+    os.makedirs('raw_data')
+
 
 @app.get("/status/")
 def read_status():
@@ -71,7 +76,12 @@ def read_status():
 
 @app.post("/track/")
 async def update_track(bboxes: str = Body(..., embed=True), files: List[UploadFile] = File(...)):
-    tracker.process([files], [json.loads(bboxes)])
+    time_str = time.strftime(TIME_FM)
+    d_bboxes = json.loads(bboxes)
+    for i, f in enumerate(files):
+        b_name = "_".join(d_bboxes[i])
+        Image.open(f.file).save(f"raw_data/{time_str}_{b_name}.jpg")
+    tracker.process([files], [d_bboxes])
     return {"status": 'success'}
 
 
