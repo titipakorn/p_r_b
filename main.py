@@ -76,11 +76,11 @@ def read_status():
 
 @app.post("/track/")
 async def update_track(bboxes: str = Body(..., embed=True), files: List[UploadFile] = File(...)):
-    time_str = time.strftime(TIME_FM)
+    #time_str = time.strftime(TIME_FM)
     d_bboxes = json.loads(bboxes)
-    for i, f in enumerate(files):
-        b_name = "_".join(map(str, d_bboxes[i]))
-        Image.open(f.file).save(f"raw_data/{time_str}_{b_name}.jpg")
+    # for i, f in enumerate(files):
+    #     b_name = "_".join(map(str, d_bboxes[i]))
+    #     Image.open(f.file).save(f"raw_data/{time_str}_{b_name}.jpg")
     tracker.process([files], [d_bboxes])
     return {"status": 'success'}
 
