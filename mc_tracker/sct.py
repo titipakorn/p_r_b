@@ -216,18 +216,18 @@ class SingleCameraTracker:
                 #################################
                 if(current_point.within(self.in_poly)):
                     if(track['in_count'] is None):
-                        if(track['out_status']):
-                            # COUNT IN
-                            SingleCameraTracker.COUNT_IN += 1
-                            track['in_count'] = 1
-                    track['in_status'] = True
+                        # if(track['out_status']):
+                        # COUNT IN
+                        SingleCameraTracker.COUNT_IN += 1
+                        track['in_count'] = 1
+                    #track['in_status'] = True
                 if(current_point.within(self.out_poly)):
                     if(track['out_count'] is None):
-                        if(track['in_status']):
-                            # COUNT OUT
-                            SingleCameraTracker.COUNT_OUT += 1
-                            track['out_count'] = 1
-                    track['out_status'] = True
+                        # if(track['in_status']):
+                        # COUNT OUT
+                        SingleCameraTracker.COUNT_OUT += 1
+                        track['out_count'] = 1
+                    #track['out_status'] = True
                 #========================#
                 ##########################
                 ## VERSION ORIGINAL ######
