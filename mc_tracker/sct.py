@@ -70,9 +70,12 @@ class ClusterFeature:
 
 def clusters_distance(clusters1, clusters2):
     if len(clusters1) > 0 and len(clusters2) > 0:
-        distances = cdist(clusters1.get_clusters_matrix(),
-                          clusters2.get_clusters_matrix(), 'cosine')
-        return np.amin(distances)
+        try:
+            distances = cdist(clusters1.get_clusters_matrix(),
+                              clusters2.get_clusters_matrix(), 'cosine')
+            return np.amin(distances)
+        except:
+            pass
     return 0.5
 
 
@@ -83,7 +86,7 @@ def clusters_vec_distance(clusters, feature):
                               feature.reshape(1, -1), 'cosine')
             return np.amin(distances)
         except:
-            return 0.5
+            pass
     return 0.5
 
 
