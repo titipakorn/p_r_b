@@ -277,7 +277,9 @@ class SingleCameraTracker:
             row_ind, col_ind = linear_sum_assignment(cost_matrix)
             for i, j in zip(row_ind, col_ind):
                 idx = active_tracks_idx[j]
-                if cost_matrix[i, j] < self.match_threshold:
+                if cost_matrix[i, j] < self.match_threshold and \
+                    self._check_velocity_constraint(self.tracks[idx], detections[i]) and \
+                        self._giou(self.tracks[idx]['boxes'][-1], detections[i]) > self.track_detection_iou_thresh:
                     assignment[i] = j
 
             for i, j in enumerate(assignment):  # candidates
@@ -418,6 +420,7 @@ class SingleCameraTracker:
             track_box = self.tracks[idx]['boxes'][-1]
             track_avg_feat = self.tracks[idx]['avg_feature']
             for j, d in enumerate(detections):
+                iou = 0.5 * self._giou(d, track_box) + 0.5
                 if track_avg_feat is not None and features[j] is not None:
                     # compare with average feature
                     reid_sim_avg = 1 - cosine(track_avg_feat, features[j])
@@ -430,8 +433,8 @@ class SingleCameraTracker:
                             self.tracks[idx]['f_cluster'], features[j])
                     reid_sim = max(reid_sim_avg, reid_sim_curr, reid_sim_clust)
                 else:
-                    reid_sim = 1
-                affinity_matrix[j, i] = reid_sim
+                    reid_sim = 0.5
+                affinity_matrix[j, i] = iou * reid_sim
         return 1 - affinity_matrix
 
     @staticmethod
