@@ -8,6 +8,7 @@ from datetime import datetime
 from threading import Timer
 import time
 from PIL import Image
+import random
 
 # API
 from fastapi import FastAPI, File, UploadFile, Body
@@ -31,7 +32,9 @@ app = FastAPI()
 number_of_cameras = 1
 
 reid = VectorCNN(config)
-tracker = MultiCameraTracker(number_of_cameras, reid, config)
+random.seed(config.random_seed)
+tracker = MultiCameraTracker(
+    number_of_cameras, reid, config, visual_analyze=config.analyzer)
 
 
 class RepeatTimer(Timer):
@@ -47,7 +50,7 @@ def update_db():
         if(t != parsed_time):
             url = 'http://52.74.221.188/api/insert.php'
             myobj = {'secure_code': (None, 'P4ssw0rd!'),
-                     'sql': (None, json.dumps({'table': 'counting', 'values': {'counting_date': parsed_date, 'counting_time': parsed_time, 'counting_in': SingleCameraTracker.COUNT_IN, 'counting_out': SingleCameraTracker.COUNT_OUT, 'branch_id': 2}}))}
+                     'sql': (None, json.dumps({'table': 'counting', 'values': {'counting_date': parsed_date, 'counting_time': parsed_time, 'counting_in': SingleCameraTracker.COUNT_IN, 'counting_out': SingleCameraTracker.COUNT_OUT, 'branch_id': 3}}))}
             requests.post(url, files=myobj)
             parsed_date = d
             parsed_time = t
