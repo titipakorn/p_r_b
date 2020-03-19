@@ -50,7 +50,7 @@ class MultiCameraTracker:
             if masks:
                 mask = masks[i]
             else:
-                mask = None
+                mask = []
             if self.bbox_min_aspect_ratio is not None:
                 all_detections[i], mask = self._filter_detections(
                     all_detections[i], mask)
