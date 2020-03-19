@@ -21,6 +21,7 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cosine, cdist
 
+from PIL import Image
 from shapely.geometry import Polygon, Point
 import torch
 from torchvision import transforms
@@ -291,7 +292,7 @@ class SingleCameraTracker:
     def process(self, frame, detections, mask=None):
         reid_features = [None]*len(detections)
         if self.reid_model:
-            reid_features = self._get_embeddings(frame, detections, mask)
+            reid_features = self._get_embeddings(frame, mask)
 
         assignment = self._continue_tracks(detections, reid_features)
         self._create_new_tracks(detections, reid_features, assignment)
@@ -656,29 +657,17 @@ class SingleCameraTracker:
         return intersection / a1 if a1 > 0 else 0
 
     def _get_embeddings(self, frame, detections, mask=None):
-        rois = []
         embeddings = []
-
-        if self.analyzer:
-            self.current_detections = []
-
-        for i in range(len(detections)):
-            rect = detections[i]
-            left, top, right, bottom = rect
-            crop = frame[top:bottom, left:right]
-            if mask and len(mask[i]) > 0:
-                crop = cv2.bitwise_and(crop, crop, mask=mask[i])
-            if left != right and top != bottom:
-                rois.append(crop)
-
-            if self.analyzer:
-                self.current_detections.append(
-                    cv2.resize(crop, self.analyzer.crop_size))
-
-        if rois:
-            embeddings = self.reid_model.forward(rois)
-            assert len(rois) == len(embeddings)
-
+        with torch.no_grad():
+            for im in frame:
+                crop = Image.open(im.file).convert(
+                    'RGB')
+                img = torch.cat([self.data_transform(
+                    crop).unsqueeze(0)], dim=0).float().to("cuda")
+                if self.analyzer:
+                    self.current_detections.append(
+                        cv2.resize(crop, self.analyzer.crop_size))
+                embeddings.append(self.reid_model.forward(img))
         return embeddings
 
     def _check_tracks_velocity_constraint(self, track1, track2):
