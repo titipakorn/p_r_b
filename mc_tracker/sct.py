@@ -686,13 +686,16 @@ class SingleCameraTracker:
                                                    track1.boxes[0], track1.get_start_time())
 
     def _check_velocity_constraint(self, detection1, det1_time, detection2, det2_time):
-        dt = abs(det2_time - det1_time)
-        avg_size = 0
-        for det in [detection1, detection2]:
-            avg_size += 0.5 * (abs(det[2] - det[0]) + abs(det[3] - det[1]))
-        avg_size *= 0.5
-        shifts = [abs(x - y) for x, y in zip(detection1, detection2)]
-        velocity = sum(shifts) / len(shifts) / dt / avg_size
-        if velocity > self.max_bbox_velocity:
-            return False
+        try:
+            dt = abs(det2_time - det1_time)
+            avg_size = 0
+            for det in [detection1, detection2]:
+                avg_size += 0.5 * (abs(det[2] - det[0]) + abs(det[3] - det[1]))
+            avg_size *= 0.5
+            shifts = [abs(x - y) for x, y in zip(detection1, detection2)]
+            velocity = sum(shifts) / len(shifts) / dt / avg_size
+            if velocity > self.max_bbox_velocity:
+                return False
+        except:
+            pass
         return True
