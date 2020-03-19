@@ -376,7 +376,7 @@ class SingleCameraTracker:
         for i, track in enumerate(self.tracks):
             if track.get_end_time() >= self.time - self.continue_time_thresh:
                 boxes = self.tlwh_to_xyah(
-                    self.tlbr_to_tlwh(track['boxes'].get_last_box()))
+                    self.tlbr_to_tlwh(track.get_last_box()))
                 current_point = Point((boxes[0], boxes[1]))  # center
                 #################################
                 #### MODIFIED VERSION ###########
