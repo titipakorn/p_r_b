@@ -282,6 +282,13 @@ class SingleCameraTracker:
         self.rectify_length_thresh = self.time_window // 2
         assert 0 <= rectify_thresh <= 1
         self.rectify_thresh = rectify_thresh
+        self.data_transform = transforms.Compose([
+            transforms.Resize([128, 64]),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[
+                                 0.229, 0.224, 0.225]),
+
+        ])
 
         self.analyzer = None
         self.current_detections = None
