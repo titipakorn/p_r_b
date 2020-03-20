@@ -144,6 +144,10 @@ class Track:
         self.boxes = [box]
         self.in_count = None
         self.out_count = None
+        self.in_status = False
+        self.out_status = False
+        self.in_state = 0
+        self.out_state = 0
         self.timestamps = [time]
         self.crops = [crops]
         if feature is not None:
@@ -381,17 +385,37 @@ class SingleCameraTracker:
                 #################################
                 #### MODIFIED VERSION ###########
                 #################################
+                # if(current_point.within(self.in_poly)):
+                #     if(track.in_count is None):
+                #         SingleCameraTracker.COUNT_IN += 1
+                #         track.in_count = 1
+                #     #track['in_status'] = True
+                # if(current_point.within(self.out_poly)):
+                #     if(track.out_count is None and track.in_count):
+                #         # if(track['in_status']):
+                #         # COUNT OUT
+                #         SingleCameraTracker.COUNT_OUT += 1
+                #         track.out_count = 1
                 if(current_point.within(self.in_poly)):
-                    if(track.in_count is None):
-                        SingleCameraTracker.COUNT_IN += 1
-                        track.in_count = 1
-                    #track['in_status'] = True
+                    if(track['in_state'] >= 1):
+                        if(track['in_count'] is None):
+                            if(track['out_state'] == 0 and track['out_status']):
+                                # COUNT IN
+                                SingleCameraTracker.COUNT_IN += 1
+                                track['in_count'] = 1
+                    track['in_status'] = True
+                    track['in_state'] += 1
+                    track['out_state'] = 0
                 if(current_point.within(self.out_poly)):
-                    if(track.out_count is None and track.in_count):
-                        # if(track['in_status']):
-                        # COUNT OUT
-                        SingleCameraTracker.COUNT_OUT += 1
-                        track.out_count = 1
+                    if(track['out_state'] >= 1):
+                        if(track['out_count'] is None):
+                            if(track['in_state'] == 0 and track['in_status']):
+                                # COUNT OUT
+                                SingleCameraTracker.COUNT_OUT += 1
+                                track['out_count'] = 1
+                    track['out_status'] = True
+                    track['in_state'] = 0
+                    track['out_state'] += 1
                 active_tracks_idx.append(i)
 
         occluded_det_idx = []
