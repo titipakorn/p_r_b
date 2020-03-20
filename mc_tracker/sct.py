@@ -54,12 +54,15 @@ class ClusterFeature:
             self.clusters_sizes[idx] += 1
             # calcualte average feature of random cluster
         else:
-            distances = cdist(feature_vec.reshape(1, -1),
-                              np.array(self.clusters).reshape(len(self.clusters), -1), 'cosine')
-            nearest_idx = np.argmin(distances)
-            self.clusters_sizes[nearest_idx] += 1
-            self.clusters[nearest_idx] += (feature_vec - self.clusters[nearest_idx]) / \
-                self.clusters_sizes[nearest_idx]
+            try:
+                distances = cdist(feature_vec.reshape(1, -1),
+                                  np.array(self.clusters).reshape(len(self.clusters), -1), 'cosine')
+                nearest_idx = np.argmin(distances)
+                self.clusters_sizes[nearest_idx] += 1
+                self.clusters[nearest_idx] += (feature_vec - self.clusters[nearest_idx]) / \
+                    self.clusters_sizes[nearest_idx]
+            except:
+                pass
 
     def get_clusters_matrix(self):
         return np.array(self.clusters).reshape(len(self.clusters), -1)
@@ -505,12 +508,16 @@ class SingleCameraTracker:
             return clusters2
 
     def _check_velocity_constraint(self, track, detection):
-        dt = self.time - track['timestamps'][-1]
-        h = abs(detection[0] - detection[1])
-        w = abs(detection[2] - detection[3])
-        size = 0.5*(w + h)
-        shifts = [abs(x - y) for x, y in zip(track['boxes'][-1], detection)]
-        velocity = sum(shifts) / len(shifts) / dt / size
-        if velocity > self.max_bbox_velocity:
-            return False
+        try:
+            dt = self.time - track['timestamps'][-1]
+            h = abs(detection[0] - detection[1])
+            w = abs(detection[2] - detection[3])
+            size = 0.5*(w + h)
+            shifts = [abs(x - y)
+                      for x, y in zip(track['boxes'][-1], detection)]
+            velocity = sum(shifts) / len(shifts) / dt / size
+            if velocity > self.max_bbox_velocity:
+                return False
+        except:
+            pass
         return True
