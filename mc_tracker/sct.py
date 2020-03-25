@@ -251,17 +251,17 @@ class SingleCameraTracker:
                     # #### MODIFIED VERSION ###########
                     # #################################
                     if(current_point.within(self.in_poly)):
-                        if(self.tracks[idx]['in_count'] is None):
+                        if(self.tracks[idx]['in_count'] is None and self.tracks[idx]['out_count']):
                             # COUNT IN
-                            img = Image.open(frames[i].file).convert('RGB')
+                            img = Image.open(frames[i].file)
                             img.save(
                                 "extract_person/IN_{}_{}.jpg".format(self.tracks[idx]['id'], SingleCameraTracker.COUNT_IN))
                             SingleCameraTracker.COUNT_IN += 1
                             self.tracks[idx]['in_count'] = 1
                     elif(current_point.within(self.out_poly)):
-                        if(self.tracks[idx]['out_count'] is None):
+                        if(self.tracks[idx]['out_count'] is None and self.tracks[idx]['in_count']):
                             # COUNT OUT
-                            img = Image.open(frames[i].file).convert('RGB')
+                            img = Image.open(frames[i].file)
                             img.save(
                                 "extract_person/OUT_{}_{}.jpg".format(self.tracks[idx]['id'], SingleCameraTracker.COUNT_OUT))
                             SingleCameraTracker.COUNT_OUT += 1

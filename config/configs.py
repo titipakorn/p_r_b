@@ -44,7 +44,7 @@ class Config(DefaultConfig):
             n_clusters=4,
             max_bbox_velocity=0.2,
             detection_occlusion_thresh=0.7,
-            track_detection_iou_thresh=0.4
+            track_detection_iou_thresh=0.45
         )
 
         self.footfall_config = dict(
