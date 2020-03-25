@@ -36,7 +36,7 @@ class Config(DefaultConfig):
         self.RERANKING = True
 
         self.sct_config = dict(
-            time_window=2,
+            time_window=10,
             continue_time_thresh=10,
             track_clear_thresh=3000,
             match_threshold=0.475,
@@ -44,7 +44,7 @@ class Config(DefaultConfig):
             n_clusters=4,
             max_bbox_velocity=0.2,
             detection_occlusion_thresh=0.7,
-            track_detection_iou_thresh=0.5
+            track_detection_iou_thresh=0.4
         )
 
         self.footfall_config = dict(
