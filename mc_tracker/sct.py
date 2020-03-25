@@ -254,7 +254,7 @@ class SingleCameraTracker:
                             # COUNT IN
                             img = Image.open(frames[i].file).convert('RGB')
                             img.save(
-                                "extract_person/IN_{}.jpg".format(self.tracks[idx]['id']))
+                                "extract_person/IN_{}_{}.jpg".format(self.tracks[idx]['id'], SingleCameraTracker.COUNT_IN))
                             SingleCameraTracker.COUNT_IN += 1
                             self.tracks[idx]['in_count'] = 1
                     elif(current_point.within(self.out_poly)):
@@ -262,7 +262,7 @@ class SingleCameraTracker:
                             # COUNT OUT
                             img = Image.open(frames[i].file).convert('RGB')
                             img.save(
-                                "extract_person/OUT_{}.jpg".format(self.tracks[idx]['id']))
+                                "extract_person/OUT_{}_{}.jpg".format(self.tracks[idx]['id'], SingleCameraTracker.COUNT_OUT))
                             SingleCameraTracker.COUNT_OUT += 1
                             self.tracks[idx]['out_count'] = 1
                     self.tracks[idx]['boxes'].append(detections[i])
@@ -377,28 +377,28 @@ class SingleCameraTracker:
                                                                detections[i],
                                                                self.global_id_getter(),
                                                                features[i]))
-                boxes = self.tlwh_to_xyah(
-                    self.tlbr_to_tlwh(detections[i]))
-                current_point = Point((boxes[0], boxes[1]))  # center
-                # #################################
-                # #### MODIFIED VERSION ###########
-                # #################################
-                if(current_point.within(self.in_poly)):
-                    if(self.tracks[-1]['in_count'] is None):
-                        # COUNT IN
-                        img = Image.open(frames[i].file).convert('RGB')
-                        img.save(
-                            "extract_person/{}_IN.jpg".format(self.tracks[-1]['id']))
-                        SingleCameraTracker.COUNT_IN += 1
-                        self.tracks[-1]['in_count'] = 1
-                elif(current_point.within(self.out_poly)):
-                    if(self.tracks[-1]['out_count'] is None):
-                        # COUNT OUT
-                        img = Image.open(frames[i].file).convert('RGB')
-                        img.save(
-                            "extract_person/{}_OUT.jpg".format(self.tracks[-1]['id']))
-                        SingleCameraTracker.COUNT_OUT += 1
-                        self.tracks[-1]['out_count'] = 1
+                # boxes = self.tlwh_to_xyah(
+                #     self.tlbr_to_tlwh(detections[i]))
+                # current_point = Point((boxes[0], boxes[1]))  # center
+                # # #################################
+                # # #### MODIFIED VERSION ###########
+                # # #################################
+                # if(current_point.within(self.in_poly)):
+                #     if(self.tracks[-1]['in_count'] is None):
+                #         # COUNT IN
+                #         img = Image.open(frames[i].file).convert('RGB')
+                #         img.save(
+                #             "extract_person/{}_IN.jpg".format(self.tracks[-1]['id']))
+                #         SingleCameraTracker.COUNT_IN += 1
+                #         self.tracks[-1]['in_count'] = 1
+                # elif(current_point.within(self.out_poly)):
+                #     if(self.tracks[-1]['out_count'] is None):
+                #         # COUNT OUT
+                #         img = Image.open(frames[i].file).convert('RGB')
+                #         img.save(
+                #             "extract_person/{}_OUT.jpg".format(self.tracks[-1]['id']))
+                #         SingleCameraTracker.COUNT_OUT += 1
+                #         self.tracks[-1]['out_count'] = 1
 
     def _create_tracklet_descr(self, timestamp, rect, id, feature):
         return {'id': id,
