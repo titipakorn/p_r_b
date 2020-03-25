@@ -60,7 +60,7 @@ class Config(DefaultConfig):
         )
 
         self.normalizer_config = dict(
-            enabled=False,
+            enabled=True,
             clip_limit=.5,
             tile_size=8
         )
