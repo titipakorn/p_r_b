@@ -148,7 +148,7 @@ class SingleCameraTracker:
         if self.reid_model:
             reid_features = self._get_embeddings(images, mask)
 
-        assignment = self._continue_tracks(detections, reid_features)
+        assignment = self._continue_tracks(images, detections, reid_features)
         if self.time % self.time_window == 0:
             self._create_new_tracks(detections, reid_features, assignment)
             self._merge_tracks()
@@ -213,64 +213,19 @@ class SingleCameraTracker:
         ret[2] /= ret[3]
         return ret
 
-    def _continue_tracks(self, detections, features):
+    def _continue_tracks(self, frames, detections, features):
         active_tracks_idx = []
         for i, track in enumerate(self.tracks):
             if track['timestamps'][-1] >= self.time - self.continue_time_thresh:
-                boxes = self.tlwh_to_xyah(
-                    self.tlbr_to_tlwh(track['boxes'][-1]))
-                current_point = Point((boxes[0], boxes[1]))  # center
-                # #################################
-                # #### MODIFIED VERSION ###########
-                # #################################
-                if(current_point.within(self.in_poly)):
-                    if(track['in_count'] is None):
-                        # if(track['out_status']):
-                        # COUNT IN
-                        SingleCameraTracker.COUNT_IN += 1
-                        track['in_count'] = 1
-                    #track['in_status'] = True
-                if(current_point.within(self.out_poly)):
-                    if(track['out_count'] is None):
-                        # if(track['in_status']):
-                        # COUNT OUT
-                        SingleCameraTracker.COUNT_OUT += 1
-                        track['out_count'] = 1
-                    #track['out_status'] = True
-                # #========================#
-                ##########################
-                ## VERSION ORIGINAL ######
-                ##########################
-                # if(current_point.within(self.in_poly)):
-                #     if(track['in_state'] >= 1):
-                #         if(track['in_count'] is None):
-                #             if(track['out_state'] == 0 and track['out_status']):
-                #                 # COUNT IN
-                #                 SingleCameraTracker.COUNT_IN += 1
-                #                 track['in_count'] = 1
-                #     track['in_status'] = True
-                #     track['in_state'] += 1
-                #     track['out_state'] = 0
-                # if(current_point.within(self.out_poly)):
-                #     if(track['out_state'] >= 1):
-                #         if(track['out_count'] is None):
-                #             if(track['in_state'] == 0 and track['in_status']):
-                #                 # COUNT OUT
-                #                 SingleCameraTracker.COUNT_OUT += 1
-                #                 track['out_count'] = 1
-                #     track['out_status'] = True
-                #     track['in_state'] = 0
-                #     track['out_state'] += 1
-                ###############################
                 active_tracks_idx.append(i)
 
-        # occluded_det_idx = []
-        # for i, det1 in enumerate(detections):
-        #     for j, det2 in enumerate(detections):
-        #         if i != j and self._ios(det1, det2) > self.detection_occlusion_thresh:
-        #             occluded_det_idx.append(i)
-        #             features[i] = None
-        #             break
+        occluded_det_idx = []
+        for i, det1 in enumerate(detections):
+            for j, det2 in enumerate(detections):
+                if i != j and self._ios(det1, det2) > self.detection_occlusion_thresh:
+                    occluded_det_idx.append(i)
+                    features[i] = None
+                    break
 
         cost_matrix = self._compute_detections_assignment_cost(
             active_tracks_idx, detections, features)
@@ -288,6 +243,26 @@ class SingleCameraTracker:
             for i, j in enumerate(assignment):  # candidates
                 if j is not None:
                     idx = active_tracks_idx[j]
+                    boxes = self.tlwh_to_xyah(
+                        self.tlbr_to_tlwh(detections[i]))
+                    current_point = Point((boxes[0], boxes[1]))  # center
+                    # #################################
+                    # #### MODIFIED VERSION ###########
+                    # #################################
+                    if(current_point.within(self.in_poly)):
+                        if(self.tracks[idx]['in_count'] is None):
+                            # COUNT IN
+                            img = Image.open(frames[i].file).convert('RGB')
+                            img.save("extract_person/{}_IN.jpg".format(idx))
+                            SingleCameraTracker.COUNT_IN += 1
+                            self.tracks[idx]['in_count'] = 1
+                    elif(current_point.within(self.out_poly)):
+                        if(self.tracks[idx]['out_count'] is None):
+                            # COUNT OUT
+                            img = Image.open(frames[i].file).convert('RGB')
+                            img.save("extract_person/{}_OUT.jpg".format(idx))
+                            SingleCameraTracker.COUNT_OUT += 1
+                            self.tracks[idx]['out_count'] = 1
                     self.tracks[idx]['boxes'].append(detections[i])
                     self.tracks[idx]['timestamps'].append(self.time)
                     self.tracks[idx]['features'].append(features[i])
