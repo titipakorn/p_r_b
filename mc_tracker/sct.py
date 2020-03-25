@@ -149,9 +149,9 @@ class SingleCameraTracker:
             reid_features = self._get_embeddings(images, mask)
 
         assignment = self._continue_tracks(images, detections, reid_features)
-        if self.time % self.time_window == 0:
-            self._create_new_tracks(detections, reid_features, assignment)
-            self._merge_tracks()
+        # if self.time % self.time_window == 0:
+        self._create_new_tracks(detections, reid_features, assignment)
+        self._merge_tracks()
         self.time += 1
 
     def get_tracked_objects(self):
