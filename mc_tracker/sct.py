@@ -126,6 +126,7 @@ class SingleCameraTracker:
         self.tracks = []
         self.history_tracks = []
         self.time = 0
+        self.candidates = []
         self.time_window = time_window
         self.continue_time_thresh = continue_time_thresh
         self.track_clear_thresh = track_clear_thresh
@@ -249,23 +250,66 @@ class SingleCameraTracker:
                     current_point = Point((boxes[0], boxes[1]))  # center
 
                     if(current_point.within(self.in_poly)):
-                        if(self.tracks[idx]['in_count'] is None):
+                        if(self.tracks[idx]['in_status'] == False):
+                            self.tracks[idx]['in_status'] = True
                             # COUNT IN
                             img = Image.open(frames[i].file)
                             img.save(
-                                "extract_person/IN_{}.jpg".format(SingleCameraTracker.COUNT_IN))
-                            SingleCameraTracker.COUNT_IN += 1
-                            self.tracks[idx]['in_count'] = 1
-                        self.tracks[idx]['in_status'] = True
+                                "extract_person/IN_{}.jpg".format(self.time+self.tracks[idx]['id']))
+                            #SingleCameraTracker.COUNT_IN += 1
+                            #self.tracks[idx]['in_count'] = 1
+                            c_in_temp = SingleCameraTracker.COUNT_IN
+                            for track2 in self.candidates:
+                                if (self.tracks[idx]['timestamps'][0] > track2['timestamps'][-1]
+                                        or track2['timestamps'][0] > self.tracks[idx]['timestamps'][-1]) \
+                                        and self.tracks[idx]['avg_feature'] is not None and track2['avg_feature'] is not None \
+                                        and self._check_velocity_constraint(self.tracks[idx], track2['boxes'][-1]):
+                                    f_avg_dist = cosine(
+                                        self.tracks[idx]['avg_feature'], track2['avg_feature'])
+                                    f_clust_dist = clusters_distance(
+                                        self.tracks[idx]['f_cluster'], track2['f_cluster'])
+                                    f_dist = min(
+                                        f_avg_dist, f_clust_dist)
+                                    if(f_dist < 0.1 and self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                        if(track2['out_status']):
+                                            track2['in_count'] = 1
+                                            SingleCameraTracker.COUNT_IN += 1
+                                        else:
+                                            c_in_temp = -1
+                                        break
+                            if(c_in_temp == SingleCameraTracker.COUNT_IN):
+                                self.candidates.append(
+                                    copy(self.tracks[idx]))
                     if(current_point.within(self.out_poly)):
-                        if(self.tracks[idx]['out_count'] is None):
+                        if(self.tracks[idx]['out_status'] == False):
+                            self.tracks[idx]['out_status'] = True
                             # COUNT OUT
                             img = Image.open(frames[i].file)
                             img.save(
-                                "extract_person/OUT_{}.jpg".format(SingleCameraTracker.COUNT_OUT))
-                            SingleCameraTracker.COUNT_OUT += 1
-                            self.tracks[idx]['out_count'] = 1
-                        self.tracks[idx]['out_status'] = True
+                                "extract_person/OUT_{}.jpg".format(self.time+self.tracks[idx]['id']))
+                            #SingleCameraTracker.COUNT_OUT += 1
+                            c_out_temp = SingleCameraTracker.COUNT_OUT
+                            for track2 in self.candidates:
+                                if (self.tracks[idx]['timestamps'][0] > track2['timestamps'][-1]
+                                        or track2['timestamps'][0] > self.tracks[idx]['timestamps'][-1]) \
+                                        and self.tracks[idx]['avg_feature'] is not None and track2['avg_feature'] is not None \
+                                        and self._check_velocity_constraint(self.tracks[idx], track2['boxes'][-1]):
+                                    f_avg_dist = cosine(
+                                        self.tracks[idx]['avg_feature'], track2['avg_feature'])
+                                    f_clust_dist = clusters_distance(
+                                        self.tracks[idx]['f_cluster'], track2['f_cluster'])
+                                    f_dist = min(
+                                        f_avg_dist, f_clust_dist)
+                                    if(f_dist < 0.1 and self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                        if(track2['in_status']):
+                                            track2['out_count'] = 1
+                                            SingleCameraTracker.COUNT_OUT += 1
+                                        else:
+                                            c_out_temp = -1
+                            if(c_out_temp == SingleCameraTracker.COUNT_OUT):
+                                self.candidates.append(
+                                    copy(self.tracks[idx]))
+                            # self.tracks[idx]['out_count'] = 1
                     # #################################
                     # #### MODIFIED VERSION ###########
                     # #################################
@@ -402,22 +446,79 @@ class SingleCameraTracker:
                 # #################################
                 # #### MODIFIED VERSION ###########
                 # #################################
+                # if(current_point.within(self.in_poly)):
+                #     if(self.tracks[-1]['in_count'] is None):
+                #         # COUNT IN
+                #         img = Image.open(frames[i].file).convert('RGB')
+                #         img.save(
+                #             "extract_person/{}_IN.jpg".format(self.tracks[-1]['id']))
+                #         SingleCameraTracker.COUNT_IN += 1
+                #         self.tracks[-1]['in_count'] = 1
+                # elif(current_point.within(self.out_poly)):
+                #     if(self.tracks[-1]['out_count'] is None):
+                #         # COUNT OUT
+                #         img = Image.open(frames[i].file).convert('RGB')
+                #         img.save(
+                #             "extract_person/{}_OUT.jpg".format(self.tracks[-1]['id']))
+                #         SingleCameraTracker.COUNT_OUT += 1
+                #         self.tracks[-1]['out_count'] = 1
                 if(current_point.within(self.in_poly)):
-                    if(self.tracks[-1]['in_count'] is None):
+                    if(self.tracks[-1]['in_status'] == False):
+                        self.tracks[-1]['in_status'] = True
                         # COUNT IN
-                        img = Image.open(frames[i].file).convert('RGB')
+                        img = Image.open(frames[i].file)
                         img.save(
-                            "extract_person/{}_IN.jpg".format(self.tracks[-1]['id']))
-                        SingleCameraTracker.COUNT_IN += 1
-                        self.tracks[-1]['in_count'] = 1
-                elif(current_point.within(self.out_poly)):
-                    if(self.tracks[-1]['out_count'] is None):
+                            "extract_person/IN_{}_F.jpg".format(self.time+self.tracks[-1]['id']))
+                        c_in_temp = SingleCameraTracker.COUNT_IN
+                        for track2 in self.candidates:
+                            if (self.tracks[-1]['timestamps'][0] > track2['timestamps'][-1]
+                                    or track2['timestamps'][0] > self.tracks[-1]['timestamps'][-1]) \
+                                    and self.tracks[-1]['avg_feature'] is not None and track2['avg_feature'] is not None \
+                                    and self._check_velocity_constraint(self.tracks[-1], track2['boxes'][-1]):
+                                f_avg_dist = cosine(
+                                    self.tracks[-1]['avg_feature'], track2['avg_feature'])
+                                f_clust_dist = clusters_distance(
+                                    self.tracks[-1]['f_cluster'], track2['f_cluster'])
+                                f_dist = min(
+                                    f_avg_dist, f_clust_dist)
+                                if(f_dist < 0.1 and self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                    if(track2['out_status']):
+                                        track2['in_count'] = 1
+                                        SingleCameraTracker.COUNT_IN += 1
+                                    else:
+                                        c_in_temp = -1
+                                    break
+                        if(c_in_temp == SingleCameraTracker.COUNT_IN):
+                            self.candidates.append(
+                                copy(self.tracks[-1]))
+                if(current_point.within(self.out_poly)):
+                    if(self.tracks[-1]['out_status'] == False):
+                        self.tracks[-1]['out_status'] = True
                         # COUNT OUT
-                        img = Image.open(frames[i].file).convert('RGB')
+                        img = Image.open(frames[i].file)
                         img.save(
-                            "extract_person/{}_OUT.jpg".format(self.tracks[-1]['id']))
-                        SingleCameraTracker.COUNT_OUT += 1
-                        self.tracks[-1]['out_count'] = 1
+                            "extract_person/OUT_{}.jpg".format(self.time+self.tracks[-1]['id']))
+                        c_out_temp = SingleCameraTracker.COUNT_OUT
+                        for track2 in self.candidates:
+                            if (self.tracks[-1]['timestamps'][0] > track2['timestamps'][-1]
+                                    or track2['timestamps'][0] > self.tracks[-1]['timestamps'][-1]) \
+                                    and self.tracks[-1]['avg_feature'] is not None and track2['avg_feature'] is not None \
+                                    and self._check_velocity_constraint(self.tracks[-1], track2['boxes'][-1]):
+                                f_avg_dist = cosine(
+                                    self.tracks[-1]['avg_feature'], track2['avg_feature'])
+                                f_clust_dist = clusters_distance(
+                                    self.tracks[-1]['f_cluster'], track2['f_cluster'])
+                                f_dist = min(
+                                    f_avg_dist, f_clust_dist)
+                                if(f_dist < 0.1 and self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                    if(track2['in_status']):
+                                        track2['out_count'] = 1
+                                        SingleCameraTracker.COUNT_OUT += 1
+                                    else:
+                                        c_out_temp = -1
+                        if(c_out_temp == SingleCameraTracker.COUNT_OUT):
+                            self.candidates.append(
+                                copy(self.tracks[-1]))
 
     def _create_tracklet_descr(self, timestamp, rect, id, feature):
         return {'id': id,
