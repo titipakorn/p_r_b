@@ -275,6 +275,7 @@ class SingleCameraTracker:
                                             track2['in_count'] = 1
                                             SingleCameraTracker.COUNT_IN += 1
                                         else:
+                                            track2['in_status'] = True
                                             c_in_temp = -1
                                         break
                             if(c_in_temp == SingleCameraTracker.COUNT_IN):
@@ -305,6 +306,7 @@ class SingleCameraTracker:
                                             track2['out_count'] = 1
                                             SingleCameraTracker.COUNT_OUT += 1
                                         else:
+                                            track2['out_status'] = True
                                             c_out_temp = -1
                             if(c_out_temp == SingleCameraTracker.COUNT_OUT):
                                 self.candidates.append(
@@ -486,6 +488,7 @@ class SingleCameraTracker:
                                         track2['in_count'] = 1
                                         SingleCameraTracker.COUNT_IN += 1
                                     else:
+                                        track2['in_status'] = True
                                         c_in_temp = -1
                                     break
                         if(c_in_temp == SingleCameraTracker.COUNT_IN):
@@ -515,6 +518,7 @@ class SingleCameraTracker:
                                         track2['out_count'] = 1
                                         SingleCameraTracker.COUNT_OUT += 1
                                     else:
+                                        track2['out_status'] = True
                                         c_out_temp = -1
                         if(c_out_temp == SingleCameraTracker.COUNT_OUT):
                             self.candidates.append(
@@ -627,13 +631,16 @@ class SingleCameraTracker:
             return clusters2
 
     def _check_velocity_constraint(self, track, detection):
-        dt = abs(self.time - track['timestamps'][-1])
-        avg_size = 0
-        for det in [track['boxes'][-1], detection]:
-            avg_size += 0.5 * (abs(det[2] - det[0]) + abs(det[3] - det[1]))
-        avg_size *= 0.5
-        shifts = [abs(x - y) for x, y in zip(track['boxes'][-1], detection)]
-        velocity = sum(shifts) / len(shifts) / dt / avg_size
-        if velocity > self.max_bbox_velocity:
-            return False
+        try:
+            dt = abs(self.time - track['timestamps'][-1])
+            avg_size = 0
+            for det in [track['boxes'][-1], detection]:
+                avg_size += 0.5 * (abs(det[2] - det[0]) + abs(det[3] - det[1]))
+            avg_size *= 0.5
+            shifts = [abs(x - y) for x, y in zip(track['boxes'][-1], detection)]
+            velocity = sum(shifts) / len(shifts) / dt / avg_size
+            if velocity > self.max_bbox_velocity:
+                return False
+        except:
+            pass
         return True
