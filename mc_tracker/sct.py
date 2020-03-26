@@ -326,7 +326,7 @@ class SingleCameraTracker:
                     break
                 if (track1['timestamps'][0] > track2['timestamps'][-1] or
                         track2['timestamps'][0] > track1['timestamps'][-1]) and \
-                        len(track1['timestamps']) >= self.rectify_time and len(track2['timestamps']) >= self.rectify_time and \
+                        len(track1['timestamps']) >= self.time_window and len(track2['timestamps']) >= self.time_window and \
                         track1['avg_feature'] is not None and track2['avg_feature'] is not None:
                     f_avg_dist = cosine(
                         track1['avg_feature'], track2['avg_feature'])
