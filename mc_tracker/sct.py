@@ -108,6 +108,7 @@ class SingleCameraTracker:
 
     def __init__(self, id, global_id_getter, global_id_releaser,
                  reid_model=None,
+                 rectify_time=5,
                  time_window=10,
                  continue_time_thresh=2,
                  track_clear_thresh=3000,
@@ -127,6 +128,7 @@ class SingleCameraTracker:
         self.history_tracks = []
         self.time = 0
         self.time_window = time_window
+        self.rectify_time = rectify_time
         self.continue_time_thresh = continue_time_thresh
         self.track_clear_thresh = track_clear_thresh
         self.match_threshold = match_threshold
@@ -247,25 +249,46 @@ class SingleCameraTracker:
                     boxes = self.tlwh_to_xyah(
                         self.tlbr_to_tlwh(detections[i]))
                     current_point = Point((boxes[0], boxes[1]))  # center
+
+                    if(current_point.within(self.in_poly)):
+                        if(self.tracks[idx]['in_count'] is None):
+                            if(self.tracks[idx]['out_status']):
+                                # COUNT IN
+                                img = Image.open(frames[i].file)
+                                img.save(
+                                    "extract_person/IN_{}.jpg".format(SingleCameraTracker.COUNT_IN))
+                                SingleCameraTracker.COUNT_IN += 1
+                                self.tracks[idx]['in_count'] = 1
+                        self.tracks[idx]['in_status'] = True
+                    if(current_point.within(self.out_poly)):
+                        if(self.tracks[idx]['out_count'] is None):
+                            if(self.tracks[idx]['in_status']):
+                                # COUNT OUT
+                                img = Image.open(frames[i].file)
+                                img.save(
+                                    "extract_person/OUT_{}_{}.jpg".format(SingleCameraTracker.COUNT_OUT))
+                                SingleCameraTracker.COUNT_OUT += 1
+                                self.tracks[idx]['out_count'] = 1
+                        self.tracks[idx]['out_status'] = True
                     # #################################
                     # #### MODIFIED VERSION ###########
                     # #################################
-                    if(current_point.within(self.in_poly)):
-                        if(self.tracks[idx]['in_count'] is None):
-                            # COUNT IN
-                            img = Image.open(frames[i].file)
-                            img.save(
-                                "extract_person/IN_{}_{}.jpg".format(self.tracks[idx]['id'], SingleCameraTracker.COUNT_IN))
-                            SingleCameraTracker.COUNT_IN += 1
-                            self.tracks[idx]['in_count'] = 1
-                    elif(current_point.within(self.out_poly)):
-                        if(self.tracks[idx]['out_count'] is None):
-                            # COUNT OUT
-                            img = Image.open(frames[i].file)
-                            img.save(
-                                "extract_person/OUT_{}_{}.jpg".format(self.tracks[idx]['id'], SingleCameraTracker.COUNT_OUT))
-                            SingleCameraTracker.COUNT_OUT += 1
-                            self.tracks[idx]['out_count'] = 1
+                    # if(current_point.within(self.in_poly)):
+                    #     if(self.tracks[idx]['in_count'] is None and self.tracks[idx]['out_count']):
+                    #         # COUNT IN
+                    #         img = Image.open(frames[i].file)
+                    #         img.save(
+                    #             "extract_person/IN_{}.jpg".format(SingleCameraTracker.COUNT_IN))
+                    #         SingleCameraTracker.COUNT_IN += 1
+                    #         self.tracks[idx]['in_count'] = 1
+                    # elif(current_point.within(self.out_poly)):
+                    #     if(self.tracks[idx]['out_count'] is None and self.tracks[idx]['out_count']):
+                    #         # COUNT OUT
+                    #         img = Image.open(frames[i].file)
+                    #         img.save(
+                    #             "extract_person/OUT_{}_{}.jpg".format(SingleCameraTracker.COUNT_OUT))
+                    #         SingleCameraTracker.COUNT_OUT += 1
+                    #         self.tracks[idx]['out_count'] = 1
                     self.tracks[idx]['boxes'].append(detections[i])
                     self.tracks[idx]['timestamps'].append(self.time)
                     self.tracks[idx]['features'].append(features[i])
@@ -305,9 +328,8 @@ class SingleCameraTracker:
                     break
                 if (track1['timestamps'][0] > track2['timestamps'][-1] or
                         track2['timestamps'][0] > track1['timestamps'][-1]) and \
-                        len(track1['timestamps']) >= self.time_window and len(track2['timestamps']) >= self.time_window and \
+                        len(track1['timestamps']) >= self.rectify_time and len(track2['timestamps']) >= self.rectify_time and \
                         track1['avg_feature'] is not None and track2['avg_feature'] is not None:
-
                     f_avg_dist = cosine(
                         track1['avg_feature'], track2['avg_feature'])
                     f_clust_dist = clusters_distance(
@@ -508,16 +530,13 @@ class SingleCameraTracker:
             return clusters2
 
     def _check_velocity_constraint(self, track, detection):
-        try:
-            dt = self.time - track['timestamps'][-1]
-            h = abs(detection[0] - detection[1])
-            w = abs(detection[2] - detection[3])
-            size = 0.5*(w + h)
-            shifts = [abs(x - y)
-                      for x, y in zip(track['boxes'][-1], detection)]
-            velocity = sum(shifts) / len(shifts) / dt / size
-            if velocity > self.max_bbox_velocity:
-                return False
-        except:
-            pass
+        dt = abs(self.time - track['timestamps'][-1])
+        avg_size = 0
+        for det in [track['boxes'][-1], detection]:
+            avg_size += 0.5 * (abs(det[2] - det[0]) + abs(det[3] - det[1]))
+        avg_size *= 0.5
+        shifts = [abs(x - y) for x, y in zip(track['boxes'][-1], detection)]
+        velocity = sum(shifts) / len(shifts) / dt / avg_size
+        if velocity > self.max_bbox_velocity:
+            return False
         return True
