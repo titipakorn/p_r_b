@@ -149,9 +149,9 @@ class SingleCameraTracker:
             reid_features = self._get_embeddings(images, mask)
 
         assignment = self._continue_tracks(images, detections, reid_features)
+        self._create_new_tracks(
+            images, detections, reid_features, assignment)
         if self.time % self.time_window/2 == 0:
-            self._create_new_tracks(
-                images, detections, reid_features, assignment)
             self._merge_tracks()
         self.time += 1
 
@@ -262,7 +262,7 @@ class SingleCameraTracker:
                             # COUNT OUT
                             img = Image.open(frames[i].file)
                             img.save(
-                                "extract_person/OUT_{}_{}.jpg".format(SingleCameraTracker.COUNT_OUT))
+                                "extract_person/OUT_{}.jpg".format(SingleCameraTracker.COUNT_OUT))
                             SingleCameraTracker.COUNT_OUT += 1
                             self.tracks[idx]['out_count'] = 1
                         self.tracks[idx]['out_status'] = True
