@@ -252,23 +252,21 @@ class SingleCameraTracker:
 
                     if(current_point.within(self.in_poly)):
                         if(self.tracks[idx]['in_count'] is None):
-                            if(self.tracks[idx]['out_status']):
-                                # COUNT IN
-                                img = Image.open(frames[i].file)
-                                img.save(
-                                    "extract_person/IN_{}.jpg".format(SingleCameraTracker.COUNT_IN))
-                                SingleCameraTracker.COUNT_IN += 1
-                                self.tracks[idx]['in_count'] = 1
+                            # COUNT IN
+                            img = Image.open(frames[i].file)
+                            img.save(
+                                "extract_person/IN_{}.jpg".format(SingleCameraTracker.COUNT_IN))
+                            SingleCameraTracker.COUNT_IN += 1
+                            self.tracks[idx]['in_count'] = 1
                         self.tracks[idx]['in_status'] = True
                     if(current_point.within(self.out_poly)):
                         if(self.tracks[idx]['out_count'] is None):
-                            if(self.tracks[idx]['in_status']):
-                                # COUNT OUT
-                                img = Image.open(frames[i].file)
-                                img.save(
-                                    "extract_person/OUT_{}_{}.jpg".format(SingleCameraTracker.COUNT_OUT))
-                                SingleCameraTracker.COUNT_OUT += 1
-                                self.tracks[idx]['out_count'] = 1
+                            # COUNT OUT
+                            img = Image.open(frames[i].file)
+                            img.save(
+                                "extract_person/OUT_{}_{}.jpg".format(SingleCameraTracker.COUNT_OUT))
+                            SingleCameraTracker.COUNT_OUT += 1
+                            self.tracks[idx]['out_count'] = 1
                         self.tracks[idx]['out_status'] = True
                     # #################################
                     # #### MODIFIED VERSION ###########
