@@ -108,7 +108,6 @@ class SingleCameraTracker:
 
     def __init__(self, id, global_id_getter, global_id_releaser,
                  reid_model=None,
-                 rectify_time=5,
                  time_window=10,
                  continue_time_thresh=2,
                  track_clear_thresh=3000,
@@ -128,7 +127,6 @@ class SingleCameraTracker:
         self.history_tracks = []
         self.time = 0
         self.time_window = time_window
-        self.rectify_time = rectify_time
         self.continue_time_thresh = continue_time_thresh
         self.track_clear_thresh = track_clear_thresh
         self.match_threshold = match_threshold
