@@ -278,7 +278,7 @@ class SingleCameraTracker:
                                         track2['features'].append(
                                             self.tracks[idx]['features'][-1])
                                         if self.tracks[idx]['features'][-1] is not None:
-                                            track['f_cluster'].update(
+                                            track2['f_cluster'].update(
                                                 features[i])
                                             if track2['avg_feature'] is None:
                                                 track2['avg_feature'] = np.zeros(
@@ -326,7 +326,7 @@ class SingleCameraTracker:
                                         track2['features'].append(
                                             self.tracks[idx]['features'][-1])
                                         if self.tracks[idx]['features'][-1] is not None:
-                                            track['f_cluster'].update(
+                                            track2['f_cluster'].update(
                                                 features[i])
                                             if track2['avg_feature'] is None:
                                                 track2['avg_feature'] = np.zeros(
@@ -533,7 +533,7 @@ class SingleCameraTracker:
                                     track2['features'].append(
                                         self.tracks[-1]['features'][-1])
                                     if self.tracks[-1]['features'][-1] is not None:
-                                        track['f_cluster'].update(features[i])
+                                        track2['f_cluster'].update(features[i])
                                         if track2['avg_feature'] is None:
                                             track2['avg_feature'] = np.zeros(
                                                 self.tracks[-1]['features'][-1].shape)
@@ -578,7 +578,7 @@ class SingleCameraTracker:
                                     track2['features'].append(
                                         self.tracks[-1]['features'][-1])
                                     if self.tracks[-1]['features'][-1] is not None:
-                                        track['f_cluster'].update(features[i])
+                                        track2['f_cluster'].update(features[i])
                                         if track2['avg_feature'] is None:
                                             track2['avg_feature'] = np.zeros(
                                                 self.tracks[-1]['features'][-1].shape)
