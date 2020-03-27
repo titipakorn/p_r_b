@@ -49,20 +49,17 @@ class ClusterFeature:
             self.clusters_sizes.append(1)
         elif sum(self.clusters_sizes) < 2*self.feature_len:  # amount of features less than 2*size
             idx = random.randint(0, self.feature_len - 1)
+            self.clusters_sizes[idx] += 1
             self.clusters[idx] += (feature_vec - self.clusters[idx]) / \
                 self.clusters_sizes[idx]
-            self.clusters_sizes[idx] += 1
             # calcualte average feature of random cluster
         else:
-            try:
-                distances = cdist(feature_vec.reshape(1, -1),
-                                  np.array(self.clusters).reshape(len(self.clusters), -1), 'cosine')
-                nearest_idx = np.argmin(distances)
-                self.clusters_sizes[nearest_idx] += 1
-                self.clusters[nearest_idx] += (feature_vec - self.clusters[nearest_idx]) / \
-                    self.clusters_sizes[nearest_idx]
-            except:
-                pass
+            distances = cdist(feature_vec.reshape(1, -1),
+                              np.array(self.clusters).reshape(len(self.clusters), -1), 'cosine')
+            nearest_idx = np.argmin(distances)
+            self.clusters_sizes[nearest_idx] += 1
+            self.clusters[nearest_idx] += (feature_vec - self.clusters[nearest_idx]) / \
+                self.clusters_sizes[nearest_idx]
 
     def get_clusters_matrix(self):
         return np.array(self.clusters).reshape(len(self.clusters), -1)
@@ -273,8 +270,9 @@ class SingleCameraTracker:
                                         track2['features'].append(
                                             self.tracks[idx]['features'][-1])
                                         if self.tracks[idx]['features'][-1] is not None:
+                                            get_feature = copy(features[i])
                                             track2['f_cluster'].update(
-                                                features[i])
+                                                get_feature)
                                             if track2['avg_feature'] is None:
                                                 track2['avg_feature'] = np.zeros(
                                                     self.tracks[idx]['features'][-1].shape)
@@ -319,8 +317,9 @@ class SingleCameraTracker:
                                         track2['features'].append(
                                             self.tracks[idx]['features'][-1])
                                         if self.tracks[idx]['features'][-1] is not None:
+                                            get_feature = copy(features[i])
                                             track2['f_cluster'].update(
-                                                features[i])
+                                                get_feature)
                                             if track2['avg_feature'] is None:
                                                 track2['avg_feature'] = np.zeros(
                                                     self.tracks[idx]['features'][-1].shape)
@@ -342,26 +341,7 @@ class SingleCameraTracker:
                             if(c_out_temp == SingleCameraTracker.COUNT_OUT):
                                 self.candidates.append(
                                     copy(self.tracks[idx]))
-                            # self.tracks[idx]['out_count'] = 1
-                    # #################################
-                    # #### MODIFIED VERSION ###########
-                    # #################################
-                    # if(current_point.within(self.in_poly)):
-                    #     if(self.tracks[idx]['in_count'] is None and self.tracks[idx]['out_count']):
-                    #         # COUNT IN
-                    #         img = Image.open(frames[i].file)
-                    #         img.save(
-                    #             "extract_person/IN_{}.jpg".format(SingleCameraTracker.COUNT_IN))
-                    #         SingleCameraTracker.COUNT_IN += 1
-                    #         self.tracks[idx]['in_count'] = 1
-                    # elif(current_point.within(self.out_poly)):
-                    #     if(self.tracks[idx]['out_count'] is None and self.tracks[idx]['out_count']):
-                    #         # COUNT OUT
-                    #         img = Image.open(frames[i].file)
-                    #         img.save(
-                    #             "extract_person/OUT_{}_{}.jpg".format(SingleCameraTracker.COUNT_OUT))
-                    #         SingleCameraTracker.COUNT_OUT += 1
-                    #         self.tracks[idx]['out_count'] = 1
+
                     self.tracks[idx]['boxes'].append(detections[i])
                     self.tracks[idx]['timestamps'].append(self.time)
                     self.tracks[idx]['features'].append(features[i])
