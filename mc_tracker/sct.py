@@ -54,7 +54,7 @@ class ClusterFeature:
                 self.clusters_sizes[idx]
             # calcualte average feature of random cluster
         else:
-            distances = cdist(feature_vec.reshape(1, -1),
+            distances = cdist(feature_vec,
                               np.array(self.clusters).reshape(len(self.clusters), -1), 'cosine')
             nearest_idx = np.argmin(distances)
             self.clusters_sizes[nearest_idx] += 1
@@ -70,23 +70,17 @@ class ClusterFeature:
 
 def clusters_distance(clusters1, clusters2):
     if len(clusters1) > 0 and len(clusters2) > 0:
-        try:
-            distances = cdist(clusters1.get_clusters_matrix(),
-                              clusters2.get_clusters_matrix(), 'cosine')
-            return np.amin(distances)
-        except:
-            pass
+        distances = cdist(clusters1.get_clusters_matrix(),
+                            clusters2.get_clusters_matrix(), 'cosine')
+        return np.amin(distances)
     return 0.5
 
 
 def clusters_vec_distance(clusters, feature):
     if len(clusters) > 0 and feature is not None:
-        try:
-            distances = cdist(clusters.get_clusters_matrix(),
-                              feature.reshape(1, -1), 'cosine')
-            return np.amin(distances)
-        except:
-            pass
+        distances = cdist(clusters.get_clusters_matrix(),
+                            feature, 'cosine')
+        return np.amin(distances)
     return 0.5
 
 
@@ -145,7 +139,6 @@ class SingleCameraTracker:
         reid_features = [None]*len(images)
         if self.reid_model:
             reid_features = self._get_embeddings(images, mask)
-            print(reid_features, list(reid_features))
 
         assignment = self._continue_tracks(images, detections, reid_features)
         if self.time % 2 == 0:
