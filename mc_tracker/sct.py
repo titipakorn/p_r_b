@@ -270,9 +270,8 @@ class SingleCameraTracker:
                                         track2['features'].append(
                                             self.tracks[idx]['features'][-1])
                                         if self.tracks[idx]['features'][-1] is not None:
-                                            get_feature = copy(features[i])
                                             track2['f_cluster'].update(
-                                                get_feature)
+                                                features[i])
                                             if track2['avg_feature'] is None:
                                                 track2['avg_feature'] = np.zeros(
                                                     self.tracks[idx]['features'][-1].shape)
@@ -317,9 +316,8 @@ class SingleCameraTracker:
                                         track2['features'].append(
                                             self.tracks[idx]['features'][-1])
                                         if self.tracks[idx]['features'][-1] is not None:
-                                            get_feature = copy(features[i])
                                             track2['f_cluster'].update(
-                                                get_feature)
+                                                features[i])
                                             if track2['avg_feature'] is None:
                                                 track2['avg_feature'] = np.zeros(
                                                     self.tracks[idx]['features'][-1].shape)
@@ -689,17 +687,17 @@ class SingleCameraTracker:
         return intersecion / m if m > 0 else 0
 
     def _get_embeddings(self, images, mask=None):
-        embeddings = []
+        embeddings = np.array([])
         # if images:
         with torch.no_grad():
-            for im in images:
-                img = torch.cat([self.data_transform(Image.open(im.file).convert(
-                    'RGB')).unsqueeze(0)], dim=0).float().to("cuda")
-                embeddings.append(self.reid_model.forward(img))
-            # img = torch.cat(
-            #     [self.data_transform(Image.open(img.file).convert(
-            #         'RGB')).unsqueeze(0) for img in images], dim=0).float().to("cuda")
-            # embeddings = self.reid_model.forward(img)
+            # for im in images:
+            #     img = torch.cat([self.data_transform(Image.open(im.file).convert(
+            #         'RGB')).unsqueeze(0)], dim=0).float().to("cuda")
+            #     embeddings.append(self.reid_model.forward(img))
+            img = torch.cat(
+                [self.data_transform(Image.open(img.file).convert(
+                    'RGB')).unsqueeze(0) for img in images], dim=0).float().to("cuda")
+            embeddings = self.reid_model.forward(img)
         # else:
         #     embeddings = np.array([])
         return embeddings
