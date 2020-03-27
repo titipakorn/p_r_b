@@ -377,6 +377,15 @@ class SingleCameraTracker:
 
         return assignment
 
+    def _get_rectification_distance(self, track1, track2):
+        if (track1['timestamps'][0] > track2['timestamps'][-1]
+            or track2['timestamps'][0] > track1['timestamps'][-1]) \
+                and track1['avg_feature'] is not None and track2['avg_feature'] is not None \
+                and self._check_velocity_constraint(track1, track2['boxes'][-1]):
+            return clusters_distance(
+                track1['f_cluster'], track2['f_cluster'])
+        return THE_BIGGEST_DISTANCE
+
     def _merge_tracks(self):
         clear_tracks = []
         for track in self.tracks:
@@ -397,26 +406,56 @@ class SingleCameraTracker:
         for person in self.candidates:
             if person['timestamps'][-1] < self.time - self.track_clear_thresh:
                 continue
+            if person['timestamps'][-1] < self.time - self.continue_time_thresh \
+                    and len(person['timestamps']) < self.time_window:
+                continue
             clear_candidates.append(person)
         self.candidates = clear_candidates
+        # Clear Candidates
+        active_tracks_idx = []
+        not_active_tracks_idx = []
+        for i, track in enumerate(self.candidates):
+            if track['timestamps'][-1] >= self.time - (self.continue_time_thresh * 4) \
+                    and len(track) >= (self.time_window // 2):
+                active_tracks_idx.append(i)
+            elif len(track) >= self.time_window // 2:
+                not_active_tracks_idx.append(i)
 
+        distance_matrix = np.zeros((len(active_tracks_idx),
+                                    len(not_active_tracks_idx)), dtype=np.float32)
+        for i, idx1 in enumerate(active_tracks_idx):
+            for j, idx2 in enumerate(not_active_tracks_idx):
+                distance_matrix[i, j] = self._get_rectification_distance(
+                    self.tracks[idx1], self.tracks[idx2])
+
+        indices_rows = np.arange(distance_matrix.shape[0])
+        indices_cols = np.arange(distance_matrix.shape[1])
+
+        while len(indices_rows) > 0 and len(indices_cols) > 0:
+            i, j = np.unravel_index(
+                np.argmin(distance_matrix), distance_matrix.shape)
+            dist = distance_matrix[i, j]
+            if dist < 0.1:
+                self._concatenate_tracks(active_tracks_idx[indices_rows[i]],
+                                         not_active_tracks_idx[indices_cols[j]])
+                distance_matrix = np.delete(distance_matrix, i, 0)
+                indices_rows = np.delete(indices_rows, i)
+                distance_matrix = np.delete(distance_matrix, j, 1)
+                indices_cols = np.delete(indices_cols, j)
+            else:
+                break
+        self.candidates = list(filter(None, self.candidates))
+
+        # Clear Track
         distance_matrix = THE_BIGGEST_DISTANCE * \
             np.eye(len(self.tracks), dtype=np.float32)
         for i, track1 in enumerate(self.tracks):
             for j, track2 in enumerate(self.tracks):
                 if j >= i:
                     break
-                if (track1['timestamps'][0] > track2['timestamps'][-1] or
-                        track2['timestamps'][0] > track1['timestamps'][-1]) and \
-                        len(track1['timestamps']) >= self.time_window and len(track2['timestamps']) >= self.time_window and \
-                        track1['avg_feature'] is not None and track2['avg_feature'] is not None:
-                    f_avg_dist = cosine(
-                        track1['avg_feature'], track2['avg_feature'])
-                    f_clust_dist = clusters_distance(
-                        track1['f_cluster'], track2['f_cluster'])
-                    distance_matrix[i, j] = min(f_avg_dist, f_clust_dist)
-                else:
-                    distance_matrix[i, j] = THE_BIGGEST_DISTANCE
+                distance_matrix[i, j] = self._get_rectification_distance(
+                    track1, track2)
+
         distance_matrix += np.transpose(distance_matrix)
 
         assignment = [None]*distance_matrix.shape[0]
@@ -438,39 +477,39 @@ class SingleCameraTracker:
 
         for i, idx in enumerate(assignment):
             if idx is not None and self.tracks[idx] is not None and self.tracks[i] is not None:
-                self._concatenate_tracks(i, idx)
+                self._concatenate_tracks(self.tracks[i], self.tracks[idx])
 
         self.tracks = list(filter(None, self.tracks))
 
-    def _concatenate_tracks(self, i, idx):
-        if self.tracks[i]['timestamps'][-1] <= self.tracks[idx]['timestamps'][0]:
-            self.tracks[i]['avg_feature'] = (none_to_zero(self.tracks[i]['avg_feature'])*len(self.tracks[i]['features']) +
-                                             none_to_zero(self.tracks[idx]['avg_feature'])*len(self.tracks[idx]['features']))
-            self.tracks[i]['f_cluster'] = self._merge_clustered_features(
-                self.tracks[i]['f_cluster'],
-                self.tracks[idx]['f_cluster'],
-                self.tracks[i]['avg_feature'],
-                self.tracks[idx]['avg_feature'])
-            self.tracks[i]['timestamps'] += self.tracks[idx]['timestamps']
-            self.tracks[i]['boxes'] += self.tracks[idx]['boxes']
-            self.tracks[i]['features'] += self.tracks[idx]['features']
-            self.tracks[i]['avg_feature'] /= len(self.tracks[i]['features'])
-            self.tracks[idx] = None
+    def _concatenate_tracks(self, track1, track2):
+        if track1['timestamps'][-1] <= track2['timestamps'][0]:
+            track1['avg_feature'] = (none_to_zero(track1['avg_feature'])*len(track1['features']) +
+                                     none_to_zero(track2['avg_feature'])*len(track2['features']))
+            track1['f_cluster'] = self._merge_clustered_features(
+                track1['f_cluster'],
+                track2['f_cluster'],
+                track1['avg_feature'],
+                track2['avg_feature'])
+            track1['timestamps'] += track2['timestamps']
+            track1['boxes'] += track2['boxes']
+            track1['features'] += track2['features']
+            track1['avg_feature'] /= len(track1['features'])
+            track2 = None
         else:
-            assert self.tracks[idx]['timestamps'][-1] <= self.tracks[i]['timestamps'][0]
-            self.tracks[idx]['avg_feature'] = (none_to_zero(self.tracks[i]['avg_feature'])*len(self.tracks[i]['features']) +
-                                               none_to_zero(self.tracks[idx]['avg_feature'])*len(self.tracks[idx]['features']))
-            self.tracks[idx]['f_cluster'] = self._merge_clustered_features(
-                self.tracks[i]['f_cluster'],
-                self.tracks[idx]['f_cluster'],
-                self.tracks[i]['avg_feature'],
-                self.tracks[idx]['avg_feature'])
-            self.tracks[idx]['timestamps'] += self.tracks[i]['timestamps']
-            self.tracks[idx]['boxes'] += self.tracks[i]['boxes']
-            self.tracks[idx]['features'] += self.tracks[i]['features']
-            self.tracks[idx]['avg_feature'] /= len(
-                self.tracks[idx]['features'])
-            self.tracks[i] = None
+            assert track2['timestamps'][-1] <= track1['timestamps'][0]
+            track2['avg_feature'] = (none_to_zero(track1['avg_feature'])*len(track1['features']) +
+                                     none_to_zero(track2['avg_feature'])*len(track2['features']))
+            track2['f_cluster'] = self._merge_clustered_features(
+                track1['f_cluster'],
+                track2['f_cluster'],
+                track1['avg_feature'],
+                track2['avg_feature'])
+            track2['timestamps'] += track1['timestamps']
+            track2['boxes'] += track1['boxes']
+            track2['features'] += track1['features']
+            track2['avg_feature'] /= len(
+                track2['features'])
+            track1 = None
 
     def _create_new_tracks(self, frames, detections, features, assignment):
         assert len(detections) == len(features)
