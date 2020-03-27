@@ -45,12 +45,13 @@ class ClusterFeature:
 
     def update(self, feature_vec):
         if len(self.clusters) < self.feature_len:  # not full cluster yet
-            self.clusters.append(feature_vec.reshape(-1))
+            print(feature_vec, feature_vec.shape)
+            self.clusters.append(feature_vec)
             self.clusters_sizes.append(1)
         elif sum(self.clusters_sizes) < 2*self.feature_len:  # amount of features less than 2*size
             idx = random.randint(0, self.feature_len - 1)
             self.clusters_sizes[idx] += 1
-            self.clusters[idx] += (feature_vec.reshape(-1) - self.clusters[idx]) / \
+            self.clusters[idx] += (feature_vec - self.clusters[idx]) / \
                 self.clusters_sizes[idx]
             # calcualte average feature of random cluster
         else:
