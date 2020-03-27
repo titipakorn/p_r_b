@@ -271,7 +271,7 @@ class SingleCameraTracker:
                                     f_dist = min(
                                         f_avg_dist, f_clust_dist)
                                     if(f_dist < 0.1 or self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
-                                        if(track2['out_status']):
+                                        if(track2['out_status'] and track2['in_count'] is None):
                                             track2['in_count'] = 1
                                             SingleCameraTracker.COUNT_IN += 1
                                         else:
@@ -302,7 +302,7 @@ class SingleCameraTracker:
                                     f_dist = min(
                                         f_avg_dist, f_clust_dist)
                                     if(f_dist < 0.1 or self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
-                                        if(track2['in_status']):
+                                        if(track2['in_status'] and track2['out_count'] is None):
                                             track2['out_count'] = 1
                                             SingleCameraTracker.COUNT_OUT += 1
                                         else:
@@ -485,7 +485,7 @@ class SingleCameraTracker:
                                 f_dist = min(
                                     f_avg_dist, f_clust_dist)
                                 if(f_dist < 0.1 or self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
-                                    if(track2['out_status']):
+                                    if(track2['out_status'] and track2['in_count'] is None):
                                         track2['in_count'] = 1
                                         SingleCameraTracker.COUNT_IN += 1
                                     else:
@@ -515,7 +515,7 @@ class SingleCameraTracker:
                                 f_dist = min(
                                     f_avg_dist, f_clust_dist)
                                 if(f_dist < 0.1 or self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
-                                    if(track2['in_status']):
+                                    if(track2['in_status'] and track2['out_count'] is None):
                                         track2['out_count'] = 1
                                         SingleCameraTracker.COUNT_OUT += 1
                                     else:
