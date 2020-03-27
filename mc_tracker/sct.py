@@ -77,10 +77,13 @@ def clusters_distance(clusters1, clusters2):
 
 
 def clusters_vec_distance(clusters, feature):
-    if len(clusters) > 0 and feature is not None:
-        distances = 0.5 * cdist(clusters.get_clusters_matrix(),
-                                feature.reshape(1, -1), 'cosine')
-        return np.amin(distances)
+    try:
+        if len(clusters) > 0 and feature is not None and feature.shape[0] == 2048:
+            distances = 0.5 * cdist(clusters.get_clusters_matrix(),
+                                    feature.reshape(1, -1), 'cosine')
+            return np.amin(distances)
+    except:
+        pass
     return 1.
 
 
@@ -628,18 +631,23 @@ class SingleCameraTracker:
             track_avg_feat = self.tracks[idx]['avg_feature']
             for j, d in enumerate(detections):
                 iou = 0.5 * self._giou(d, track_box) + 0.5
-                if track_avg_feat is not None and features[j] is not None:
-                    # compare with average feature
-                    reid_sim_avg = 1 - cosine(track_avg_feat, features[j])
-                    # compare with last feature
-                    reid_sim_curr = 1 - \
-                        cosine(self.tracks[idx]['features'][-1], features[j])
-                    # compare with cluster ?
-                    reid_sim_clust = 1 - \
-                        clusters_vec_distance(
-                            self.tracks[idx]['f_cluster'], features[j])
-                    reid_sim = max(reid_sim_avg, reid_sim_curr, reid_sim_clust)
-                else:
+                try:
+                    if track_avg_feat is not None and features[j] is not None and features[j].shape[0] == 2048:
+                        # compare with average feature
+                        reid_sim_avg = 1 - cosine(track_avg_feat, features[j])
+                        # compare with last feature
+                        reid_sim_curr = 1 - \
+                            cosine(self.tracks[idx]
+                                   ['features'][-1], features[j])
+                        # compare with cluster ?
+                        reid_sim_clust = 1 - \
+                            clusters_vec_distance(
+                                self.tracks[idx]['f_cluster'], features[j])
+                        reid_sim = max(
+                            reid_sim_avg, reid_sim_curr, reid_sim_clust)
+                    else:
+                        reid_sim = 0.5
+                except:
                     reid_sim = 0.5
                 affinity_matrix[j, i] = iou * reid_sim
         return 1 - affinity_matrix
