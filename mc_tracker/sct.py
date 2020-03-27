@@ -47,6 +47,10 @@ class ClusterFeature:
         if len(self.clusters) < self.feature_len:  # not full cluster yet
             print(feature_vec, feature_vec.shape)
             self.clusters.append(feature_vec)
+            print(np.array(self.clusters).reshape(len(self.clusters), -1),
+                  np.array(self.clusters).reshape(len(self.clusters), -1).shape)
+            print(np.array([feature_vec]).reshape(1, -1),
+                  np.array([feature_vec]).reshape(1, -1).shape)
             self.clusters_sizes.append(1)
         elif sum(self.clusters_sizes) < 2*self.feature_len:  # amount of features less than 2*size
             idx = random.randint(0, self.feature_len - 1)
