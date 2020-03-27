@@ -54,12 +54,16 @@ class ClusterFeature:
                 self.clusters_sizes[idx]
             # calcualte average feature of random cluster
         else:
-            distances = cdist(feature_vec.reshape(1, -1),
-                              np.array(self.clusters).reshape(len(self.clusters), -1), 'cosine')
-            nearest_idx = np.argmin(distances)
-            self.clusters_sizes[nearest_idx] += 1
-            self.clusters[nearest_idx] += (feature_vec - self.clusters[nearest_idx]) / \
-                self.clusters_sizes[nearest_idx]
+            try:
+                distances = cdist(feature_vec.reshape(1, -1),
+                                  np.array(self.clusters).reshape(len(self.clusters), -1), 'cosine')
+                nearest_idx = np.argmin(distances)
+                self.clusters_sizes[nearest_idx] += 1
+                self.clusters[nearest_idx] += (feature_vec - self.clusters[nearest_idx]) / \
+                    self.clusters_sizes[nearest_idx]
+            except ValueError:
+                print("UP ERROR", feature_vec.reshape(1, -1).shape,
+                      np.array(self.clusters).reshape(len(self.clusters), -1).shape)
 
     def get_clusters_matrix(self):
         return np.array(self.clusters).reshape(len(self.clusters), -1)
@@ -69,18 +73,26 @@ class ClusterFeature:
 
 
 def clusters_distance(clusters1, clusters2):
-    if len(clusters1) > 0 and len(clusters2) > 0:
-        distances = 0.5 * cdist(clusters1.get_clusters_matrix(),
-                                clusters2.get_clusters_matrix(), 'cosine')
-        return np.amin(distances)
+    try:
+        if len(clusters1) > 0 and len(clusters2) > 0:
+            distances = 0.5 * cdist(clusters1.get_clusters_matrix(),
+                                    clusters2.get_clusters_matrix(), 'cosine')
+            return np.amin(distances)
+    except ValueError:
+        print('cluster distance error', clusters1.get_clusters_matrix().shape,
+              clusters2.get_clusters_matrix().shape)
     return 1
 
 
 def clusters_vec_distance(clusters, feature):
-    if len(clusters) > 0 and feature is not None:
-        distances = 0.5 * cdist(clusters.get_clusters_matrix(),
-                                feature.reshape(1, -1), 'cosine')
-        return np.amin(distances)
+    try:
+        if len(clusters) > 0 and feature is not None:
+            distances = 0.5 * cdist(clusters.get_clusters_matrix(),
+                                    feature.reshape(1, -1), 'cosine')
+            return np.amin(distances)
+    except ValueError:
+        print('cluster vec error',clusters.get_clusters_matrix().shape,
+              feature.reshape(1, -1).shape)
     return 1.
 
 
