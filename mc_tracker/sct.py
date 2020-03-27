@@ -252,12 +252,7 @@ class SingleCameraTracker:
                     if(current_point.within(self.in_poly)):
                         if(self.tracks[idx]['in_status'] == False):
                             self.tracks[idx]['in_status'] = True
-                            # COUNT IN
-                            img = Image.open(frames[i].file)
-                            img.save(
-                                "extract_person/IN_{}.jpg".format(self.time+self.tracks[idx]['id']))
-                            #SingleCameraTracker.COUNT_IN += 1
-                            #self.tracks[idx]['in_count'] = 1
+
                             c_in_temp = SingleCameraTracker.COUNT_IN
                             for track2 in self.candidates:
                                 if (self.tracks[idx]['timestamps'][0] > track2['timestamps'][-1]
@@ -290,6 +285,9 @@ class SingleCameraTracker:
                                             track2['avg_feature'] = None
                                         if(track2['out_status'] and track2['in_count'] is None):
                                             track2['in_count'] = 1
+                                            img = Image.open(frames[i].file)
+                                            img.save(
+                                                "extract_person/IN_{}.jpg".format(self.time+track2['id']))
                                             SingleCameraTracker.COUNT_IN += 1
                                         else:
                                             track2['in_status'] = True
@@ -301,11 +299,6 @@ class SingleCameraTracker:
                     if(current_point.within(self.out_poly)):
                         if(self.tracks[idx]['out_status'] == False):
                             self.tracks[idx]['out_status'] = True
-                            # COUNT OUT
-                            img = Image.open(frames[i].file)
-                            img.save(
-                                "extract_person/OUT_{}.jpg".format(self.time+self.tracks[idx]['id']))
-                            #SingleCameraTracker.COUNT_OUT += 1
                             c_out_temp = SingleCameraTracker.COUNT_OUT
                             for track2 in self.candidates:
                                 if (self.tracks[idx]['timestamps'][0] > track2['timestamps'][-1]
@@ -339,6 +332,9 @@ class SingleCameraTracker:
                                         if(track2['in_status'] and track2['out_count'] is None):
                                             track2['out_count'] = 1
                                             SingleCameraTracker.COUNT_OUT += 1
+                                            img = Image.open(frames[i].file)
+                                            img.save(
+                                                "extract_person/OUT_{}.jpg".format(self.time+track2['id']))
                                         else:
                                             track2['out_status'] = True
                                             c_out_temp = -1
@@ -509,10 +505,6 @@ class SingleCameraTracker:
                 if(current_point.within(self.in_poly)):
                     if(self.tracks[-1]['in_status'] == False):
                         self.tracks[-1]['in_status'] = True
-                        # COUNT IN
-                        img = Image.open(frames[i].file)
-                        img.save(
-                            "extract_person/IN_{}_F.jpg".format(self.time+self.tracks[-1]['id']))
                         c_in_temp = SingleCameraTracker.COUNT_IN
                         for track2 in self.candidates:
                             if (self.tracks[-1]['timestamps'][0] > track2['timestamps'][-1]
@@ -544,6 +536,9 @@ class SingleCameraTracker:
                                     if(track2['out_status'] and track2['in_count'] is None):
                                         track2['in_count'] = 1
                                         SingleCameraTracker.COUNT_IN += 1
+                                        img = Image.open(frames[i].file)
+                                        img.save(
+                                            "extract_person/IN_{}_F.jpg".format(self.time+track2['id']))
                                     else:
                                         track2['in_status'] = True
                                         c_in_temp = -1
@@ -554,10 +549,6 @@ class SingleCameraTracker:
                 if(current_point.within(self.out_poly)):
                     if(self.tracks[-1]['out_status'] == False):
                         self.tracks[-1]['out_status'] = True
-                        # COUNT OUT
-                        img = Image.open(frames[i].file)
-                        img.save(
-                            "extract_person/OUT_{}.jpg".format(self.time+self.tracks[-1]['id']))
                         c_out_temp = SingleCameraTracker.COUNT_OUT
                         for track2 in self.candidates:
                             if (self.tracks[-1]['timestamps'][0] > track2['timestamps'][-1]
@@ -589,6 +580,9 @@ class SingleCameraTracker:
                                     if(track2['in_status'] and track2['out_count'] is None):
                                         track2['out_count'] = 1
                                         SingleCameraTracker.COUNT_OUT += 1
+                                        img = Image.open(frames[i].file)
+                                        img.save(
+                                            "extract_person/OUT_{}_F.jpg".format(self.time+track2['id']))
                                     else:
                                         track2['out_status'] = True
                                         c_out_temp = -1
