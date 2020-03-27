@@ -54,7 +54,7 @@ class ClusterFeature:
                 self.clusters_sizes[idx]
             # calcualte average feature of random cluster
         else:
-            distances = cdist(feature_vec,
+            distances = cdist(feature_vec.reshape(1, -1),
                               np.array(self.clusters).reshape(len(self.clusters), -1), 'cosine')
             nearest_idx = np.argmin(distances)
             self.clusters_sizes[nearest_idx] += 1
@@ -70,18 +70,18 @@ class ClusterFeature:
 
 def clusters_distance(clusters1, clusters2):
     if len(clusters1) > 0 and len(clusters2) > 0:
-        distances = cdist(clusters1.get_clusters_matrix(),
-                            clusters2.get_clusters_matrix(), 'cosine')
+        distances = 0.5 * cdist(clusters1.get_clusters_matrix(),
+                                clusters2.get_clusters_matrix(), 'cosine')
         return np.amin(distances)
-    return 0.5
+    return 1
 
 
 def clusters_vec_distance(clusters, feature):
     if len(clusters) > 0 and feature is not None:
-        distances = cdist(clusters.get_clusters_matrix(),
-                            feature, 'cosine')
+        distances = 0.5 * cdist(clusters.get_clusters_matrix(),
+                                feature.reshape(1, -1), 'cosine')
         return np.amin(distances)
-    return 0.5
+    return 1.
 
 
 def convert_polygon(json):
