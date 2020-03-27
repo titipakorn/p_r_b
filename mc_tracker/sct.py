@@ -710,13 +710,19 @@ class SingleCameraTracker:
     def _merge_clustered_features(self, clusters1, clusters2, features1, features2):
         if len(features1) >= len(features2):
             for feature in features2:
-                if feature is not None:
-                    clusters1.update(feature)
+                try:
+                    if feature is not None and feature.shape[0] == 2048:
+                        clusters1.update(feature)
+                except:
+                    continue
             return clusters1
         else:
             for feature in features1:
-                if feature is not None:
-                    clusters2.update(feature)
+                try:
+                    if feature is not None and feature.shape[0] == 2048:
+                        clusters2.update(feature)
+                except:
+                    continue
             return clusters2
 
     def _check_velocity_constraint(self, track, detection):
