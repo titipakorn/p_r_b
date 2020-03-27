@@ -270,7 +270,7 @@ class SingleCameraTracker:
                                         self.tracks[idx]['f_cluster'], track2['f_cluster'])
                                     f_dist = min(
                                         f_avg_dist, f_clust_dist)
-                                    if(f_dist < 0.1 and self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                    if(f_dist < 0.1 or self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
                                         if(track2['out_status']):
                                             track2['in_count'] = 1
                                             SingleCameraTracker.COUNT_IN += 1
@@ -301,13 +301,14 @@ class SingleCameraTracker:
                                         self.tracks[idx]['f_cluster'], track2['f_cluster'])
                                     f_dist = min(
                                         f_avg_dist, f_clust_dist)
-                                    if(f_dist < 0.1 and self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                    if(f_dist < 0.1 or self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
                                         if(track2['in_status']):
                                             track2['out_count'] = 1
                                             SingleCameraTracker.COUNT_OUT += 1
                                         else:
                                             track2['out_status'] = True
                                             c_out_temp = -1
+                                        break
                             if(c_out_temp == SingleCameraTracker.COUNT_OUT):
                                 self.candidates.append(
                                     copy(self.tracks[idx]))
@@ -483,7 +484,7 @@ class SingleCameraTracker:
                                     self.tracks[-1]['f_cluster'], track2['f_cluster'])
                                 f_dist = min(
                                     f_avg_dist, f_clust_dist)
-                                if(f_dist < 0.1 and self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                if(f_dist < 0.1 or self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
                                     if(track2['out_status']):
                                         track2['in_count'] = 1
                                         SingleCameraTracker.COUNT_IN += 1
@@ -513,13 +514,14 @@ class SingleCameraTracker:
                                     self.tracks[-1]['f_cluster'], track2['f_cluster'])
                                 f_dist = min(
                                     f_avg_dist, f_clust_dist)
-                                if(f_dist < 0.1 and self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                if(f_dist < 0.1 or self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
                                     if(track2['in_status']):
                                         track2['out_count'] = 1
                                         SingleCameraTracker.COUNT_OUT += 1
                                     else:
                                         track2['out_status'] = True
                                         c_out_temp = -1
+                                    break
                         if(c_out_temp == SingleCameraTracker.COUNT_OUT):
                             self.candidates.append(
                                 copy(self.tracks[-1]))
@@ -637,7 +639,8 @@ class SingleCameraTracker:
             for det in [track['boxes'][-1], detection]:
                 avg_size += 0.5 * (abs(det[2] - det[0]) + abs(det[3] - det[1]))
             avg_size *= 0.5
-            shifts = [abs(x - y) for x, y in zip(track['boxes'][-1], detection)]
+            shifts = [abs(x - y)
+                      for x, y in zip(track['boxes'][-1], detection)]
             velocity = sum(shifts) / len(shifts) / dt / avg_size
             if velocity > self.max_bbox_velocity:
                 return False
