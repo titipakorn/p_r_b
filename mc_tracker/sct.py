@@ -221,13 +221,13 @@ class SingleCameraTracker:
             if track['timestamps'][-1] >= self.time - self.continue_time_thresh:
                 active_tracks_idx.append(i)
 
-        occluded_det_idx = []
-        for i, det1 in enumerate(detections):
-            for j, det2 in enumerate(detections):
-                if i != j and self._ios(det1, det2) > self.detection_occlusion_thresh:
-                    occluded_det_idx.append(i)
-                    features[i] = None
-                    break
+        # occluded_det_idx = []
+        # for i, det1 in enumerate(detections):
+        #     for j, det2 in enumerate(detections):
+        #         if i != j and self._ios(det1, det2) > self.detection_occlusion_thresh:
+        #             occluded_det_idx.append(i)
+        #             features[i] = None
+        #             break
 
         cost_matrix = self._compute_detections_assignment_cost(
             active_tracks_idx, detections, features)
