@@ -221,13 +221,13 @@ class SingleCameraTracker:
             if track['timestamps'][-1] >= self.time - self.continue_time_thresh:
                 active_tracks_idx.append(i)
 
-        # occluded_det_idx = []
-        # for i, det1 in enumerate(detections):
-        #     for j, det2 in enumerate(detections):
-        #         if i != j and self._ios(det1, det2) > self.detection_occlusion_thresh:
-        #             occluded_det_idx.append(i)
-        #             features[i] = None
-        #             break
+        occluded_det_idx = []
+        for i, det1 in enumerate(detections):
+            for j, det2 in enumerate(detections):
+                if i != j and self._ios(det1, det2) > self.detection_occlusion_thresh:
+                    occluded_det_idx.append(i)
+                    features[i] = None
+                    break
 
         cost_matrix = self._compute_detections_assignment_cost(
             active_tracks_idx, detections, features)
@@ -274,10 +274,10 @@ class SingleCameraTracker:
                                         if(track2['out_status'] and track2['in_count'] is None):
                                             track2['in_count'] = 1
                                             SingleCameraTracker.COUNT_IN += 1
+                                            break
                                         else:
                                             track2['in_status'] = True
                                             c_in_temp = -1
-                                        break
                             if(c_in_temp == SingleCameraTracker.COUNT_IN):
                                 self.candidates.append(
                                     copy(self.tracks[idx]))
@@ -305,10 +305,10 @@ class SingleCameraTracker:
                                         if(track2['in_status'] and track2['out_count'] is None):
                                             track2['out_count'] = 1
                                             SingleCameraTracker.COUNT_OUT += 1
+                                            break
                                         else:
                                             track2['out_status'] = True
                                             c_out_temp = -1
-                                        break
                             if(c_out_temp == SingleCameraTracker.COUNT_OUT):
                                 self.candidates.append(
                                     copy(self.tracks[idx]))
@@ -488,10 +488,10 @@ class SingleCameraTracker:
                                     if(track2['out_status'] and track2['in_count'] is None):
                                         track2['in_count'] = 1
                                         SingleCameraTracker.COUNT_IN += 1
+                                        break
                                     else:
                                         track2['in_status'] = True
                                         c_in_temp = -1
-                                    break
                         if(c_in_temp == SingleCameraTracker.COUNT_IN):
                             self.candidates.append(
                                 copy(self.tracks[-1]))
@@ -518,10 +518,10 @@ class SingleCameraTracker:
                                     if(track2['in_status'] and track2['out_count'] is None):
                                         track2['out_count'] = 1
                                         SingleCameraTracker.COUNT_OUT += 1
+                                        break
                                     else:
                                         track2['out_status'] = True
                                         c_out_temp = -1
-                                    break
                         if(c_out_temp == SingleCameraTracker.COUNT_OUT):
                             self.candidates.append(
                                 copy(self.tracks[-1]))
