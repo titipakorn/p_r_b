@@ -44,11 +44,8 @@ class ClusterFeature:
             self.clusters_sizes.append(1)
 
     def update(self, feature_vec):
-        assert feature_vec.shape[0] == 2048
         if len(self.clusters) < self.feature_len:  # not full cluster yet
             self.clusters.append(feature_vec)
-            print(np.array(self.clusters).reshape(
-                len(self.clusters), -1).shape)
             self.clusters_sizes.append(1)
         elif sum(self.clusters_sizes) < 2*self.feature_len:  # amount of features less than 2*size
             idx = random.randint(0, self.feature_len - 1)
@@ -57,18 +54,12 @@ class ClusterFeature:
                 self.clusters_sizes[idx]
             # calcualte average feature of random cluster
         else:
-            print(np.array(self.clusters).reshape(
-                len(self.clusters), -1).shape)
-            try:
-                distances = cdist(feature_vec.reshape(1, -1),
-                                  np.array(self.clusters).reshape(len(self.clusters), -1), 'cosine')
-                nearest_idx = np.argmin(distances)
-                self.clusters_sizes[nearest_idx] += 1
-                self.clusters[nearest_idx] += (feature_vec - self.clusters[nearest_idx]) / \
-                    self.clusters_sizes[nearest_idx]
-            except ValueError:
-                print("UP ERROR", feature_vec.shape,
-                      np.array(self.clusters).reshape(len(self.clusters), -1).shape)
+            distances = cdist(feature_vec.reshape(1, -1),
+                              np.array(self.clusters).reshape(len(self.clusters), -1), 'cosine')
+            nearest_idx = np.argmin(distances)
+            self.clusters_sizes[nearest_idx] += 1
+            self.clusters[nearest_idx] += (feature_vec - self.clusters[nearest_idx]) / \
+                self.clusters_sizes[nearest_idx]
 
     def get_clusters_matrix(self):
         return np.array(self.clusters).reshape(len(self.clusters), -1)
@@ -78,26 +69,18 @@ class ClusterFeature:
 
 
 def clusters_distance(clusters1, clusters2):
-    try:
-        if len(clusters1) > 0 and len(clusters2) > 0:
-            distances = 0.5 * cdist(clusters1.get_clusters_matrix(),
-                                    clusters2.get_clusters_matrix(), 'cosine')
-            return np.amin(distances)
-    except ValueError:
-        print('cluster distance error', clusters1.get_clusters_matrix().shape,
-              clusters2.get_clusters_matrix().shape)
+    if len(clusters1) > 0 and len(clusters2) > 0:
+        distances = 0.5 * cdist(clusters1.get_clusters_matrix(),
+                                clusters2.get_clusters_matrix(), 'cosine')
+        return np.amin(distances)
     return 1
 
 
 def clusters_vec_distance(clusters, feature):
-    try:
-        if len(clusters) > 0 and feature is not None:
-            distances = 0.5 * cdist(clusters.get_clusters_matrix(),
-                                    feature.reshape(1, -1), 'cosine')
-            return np.amin(distances)
-    except ValueError:
-        print('cluster vec error', clusters.get_clusters_matrix().shape,
-              feature.shape)
+    if len(clusters) > 0 and feature is not None:
+        distances = 0.5 * cdist(clusters.get_clusters_matrix(),
+                                feature.reshape(1, -1), 'cosine')
+        return np.amin(distances)
     return 1.
 
 
@@ -353,16 +336,19 @@ class SingleCameraTracker:
 
                     self.tracks[idx]['boxes'].append(detections[i])
                     self.tracks[idx]['timestamps'].append(self.time)
-                    self.tracks[idx]['features'].append(features[i])
-                    if features[i] is not None:
-                        self.tracks[idx]['f_cluster'].update(features[i])
-                        if self.tracks[idx]['avg_feature'] is None:
-                            self.tracks[idx]['avg_feature'] = np.zeros(
-                                features[i].shape)
-                        self.tracks[idx]['avg_feature'] += (features[i] - self.tracks[idx]['avg_feature']) / \
-                            len(self.tracks[idx]['features'])
-                    else:
-                        self.tracks[idx]['avg_feature'] = None
+                    try:
+                        if features[i] is not None and features[i].shape[0] == 2048:
+                            self.tracks[idx]['features'].append(features[i])
+                            self.tracks[idx]['f_cluster'].update(features[i])
+                            if self.tracks[idx]['avg_feature'] is None:
+                                self.tracks[idx]['avg_feature'] = np.zeros(
+                                    features[i].shape)
+                            self.tracks[idx]['avg_feature'] += (features[i] - self.tracks[idx]['avg_feature']) / \
+                                len(self.tracks[idx]['features'])
+                        else:
+                            self.tracks[idx]['avg_feature'] = None
+                    except:
+                        pass
 
         return assignment
 
