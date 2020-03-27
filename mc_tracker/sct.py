@@ -145,6 +145,7 @@ class SingleCameraTracker:
         reid_features = [None]*len(images)
         if self.reid_model:
             reid_features = self._get_embeddings(images, mask)
+            print(reid_features, list(reid_features))
 
         assignment = self._continue_tracks(images, detections, reid_features)
         if self.time % 2 == 0:
