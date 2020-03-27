@@ -63,7 +63,7 @@ class ClusterFeature:
                 self.clusters[nearest_idx] += (feature_vec.reshape(-1) - self.clusters[nearest_idx]) / \
                     self.clusters_sizes[nearest_idx]
             except ValueError:
-                print("UP ERROR", feature_vec.reshape(1, -1).shape,
+                print("UP ERROR", feature_vec.shape,
                       np.array(self.clusters).reshape(len(self.clusters), -1).shape)
 
     def get_clusters_matrix(self):
@@ -93,7 +93,7 @@ def clusters_vec_distance(clusters, feature):
             return np.amin(distances)
     except ValueError:
         print('cluster vec error', clusters.get_clusters_matrix().shape,
-              feature.reshape(1, -1).shape)
+              feature.shape)
     return 1.
 
 
