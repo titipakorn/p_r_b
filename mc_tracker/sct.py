@@ -259,7 +259,8 @@ class SingleCameraTracker:
                                         self.tracks[idx]['f_cluster'], track2['f_cluster'])
                                     f_dist = min(
                                         f_avg_dist, f_clust_dist)
-                                    if(f_dist < 0.1 or self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                    # if(f_dist < 0.1 or self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                    if(f_dist < 0.1):
                                         track2['boxes'].append(
                                             self.tracks[idx]['boxes'][-1])
                                         track2['timestamps'].append(
@@ -305,7 +306,8 @@ class SingleCameraTracker:
                                         self.tracks[idx]['f_cluster'], track2['f_cluster'])
                                     f_dist = min(
                                         f_avg_dist, f_clust_dist)
-                                    if(f_dist < 0.1 or self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                    # if(f_dist < 0.1 or self._giou(self.tracks[idx]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                    if(f_dist < 0.1):
                                         track2['boxes'].append(
                                             self.tracks[idx]['boxes'][-1])
                                         track2['timestamps'].append(
@@ -534,7 +536,8 @@ class SingleCameraTracker:
                                     self.tracks[-1]['f_cluster'], track2['f_cluster'])
                                 f_dist = min(
                                     f_avg_dist, f_clust_dist)
-                                if(f_dist < 0.1 or self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                # if(f_dist < 0.1 or self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                if(f_dist < 0.1):
                                     track2['boxes'].append(
                                         self.tracks[-1]['boxes'][-1])
                                     track2['timestamps'].append(
@@ -578,7 +581,8 @@ class SingleCameraTracker:
                                     self.tracks[-1]['f_cluster'], track2['f_cluster'])
                                 f_dist = min(
                                     f_avg_dist, f_clust_dist)
-                                if(f_dist < 0.1 or self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                # if(f_dist < 0.1 or self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                if(f_dist < 0.1):
                                     track2['boxes'].append(
                                         self.tracks[-1]['boxes'][-1])
                                     track2['timestamps'].append(
@@ -590,8 +594,8 @@ class SingleCameraTracker:
                                         if track2['avg_feature'] is None:
                                             track2['avg_feature'] = np.zeros(
                                                 self.tracks[-1]['features'][-1].shape)
-                                        track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) / \
-                                            len(self.tracks[-1]['features'])
+                                        track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) /
+                                        len(self.tracks[-1]['features'])
                                     else:
                                         track2['avg_feature'] = None
                                     if(track2['in_status'] and track2['out_count'] is None):
