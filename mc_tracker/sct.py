@@ -246,74 +246,82 @@ class SingleCameraTracker:
                     if(current_point.within(self.in_poly)):
                         if(self.tracks[idx]['in_status'] == False):
                             self.tracks[idx]['in_status'] = True
-
                             c_in_temp = SingleCameraTracker.COUNT_IN
-                            for track2 in self.candidates:
-                                if (self.tracks[idx]['timestamps'][0] > track2['timestamps'][-1]
-                                        or track2['timestamps'][0] > self.tracks[idx]['timestamps'][-1]) \
-                                        and self.tracks[idx]['avg_feature'] is not None and track2['avg_feature'] is not None \
-                                        and self._check_velocity_constraint(self.tracks[idx], track2['boxes'][-1]):
-                                    f_avg_dist = cosine(
-                                        self.tracks[idx]['avg_feature'], track2['avg_feature'])
-                                    f_curr_dist = cosine(
-                                        self.tracks[idx]['feature'][-1], track2['feature'][-1])
-                                    f_clust_dist = clusters_distance(
-                                        self.tracks[idx]['f_cluster'], track2['f_cluster'])
-                                    f_dist = min(
-                                        f_avg_dist, f_curr_dist, f_clust_dist)
-                                    a_size = self.tlbr_to_tlwh(
-                                        self.tracks[idx]['boxes'][-1])
-                                    b_size = self.tlbr_to_tlwh(
-                                        track2['boxes'][-1])
-                                    if(f_dist < 0.1 and abs(a_size[0][0]-b_size[0][0]) < 50 and abs(a_size[0][1]-b_size[0][1]) < 50):
-                                        track2['boxes'].append(
-                                            self.tracks[idx]['boxes'][-1])
-                                        track2['timestamps'].append(
-                                            self.tracks[idx]['timestamps'][-1])
-                                        track2['features'].append(
-                                            self.tracks[idx]['features'][-1])
-                                        if self.tracks[idx]['features'][-1] is not None:
-                                            track2['f_cluster'].update(
-                                                features[i])
-                                            if track2['avg_feature'] is None:
-                                                track2['avg_feature'] = np.zeros(
-                                                    self.tracks[idx]['features'][-1].shape)
-                                            track2['avg_feature'] += (self.tracks[idx]['features'][-1] - track2['avg_feature']) / \
-                                                len(self.tracks[idx]
-                                                    ['features'])
-                                        else:
-                                            track2['avg_feature'] = None
-                                        if(track2['out_status'] and track2['in_count'] is None):
-                                            track2['in_count'] = 1
-                                            img = Image.open(frames[i].file)
-                                            img.save(
-                                                "extract_person/IN_{}.jpg".format(self.time+track2['id']))
-                                            SingleCameraTracker.COUNT_IN += 1
-                                        else:
+                            list_curr_f = [feature['feature'][-1]
+                                           for feature in self.candidates]
+                            list_avg_f = [feature['avg_feature'][-1]
+                                          for feature in self.candidates]
+                            list_clus_f = [feature['f_cluster'][-1]
+                                           for feature in self.candidates]
+                            distances_f = cdist(self.tracks[idx]['feature'][-1].reshape(1, -1),
+                                                np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
+                            nearest_idx_f = np.argmin(distances_f)
+                            distances_avg_f = cdist(self.tracks[idx]['feature'][-1].reshape(1, -1),
+                                                    np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
+                            nearest_idx_avg = np.argmin(distances_avg_f)
+                            distances_clus_f = cdist(self.tracks[idx]['feature'][-1].reshape(1, -1),
+                                                     np.array(list_clus_f).reshape(len(list_clus_f), -1), 'cosine')
+                            nearest_idx_clus = np.argmin(distances_clus_f)
+                            distances = [
+                                distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], distances_clus_f[nearest_idx_clus]]
+                            f_indexes = [nearest_idx_f,
+                                         nearest_idx_avg, nearest_idx_clus]
+                            f_dist = distances.index(min(distances))
+                            if(distances[f_dist] < 0.1):
+                                self.candidates[f_indexes[f_dist]]['boxes'].append(
+                                    self.tracks[idx]['boxes'][-1])
+                                self.candidates[f_indexes[f_dist]]['timestamps'].append(
+                                    self.tracks[idx]['timestamps'][-1])
+                                self.candidates[f_indexes[f_dist]]['features'].append(
+                                    self.tracks[idx]['features'][-1])
+                                if self.tracks[idx]['features'][-1] is not None:
+                                    self.candidates[f_indexes[f_dist]]['f_cluster'].update(
+                                        features[i])
+                                    if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
+                                        self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
+                                            self.tracks[idx]['features'][-1].shape)
+                                    self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[idx]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
+                                        len(self.tracks[idx]
+                                            ['features'])
+                                else:
+                                    self.candidates[f_indexes[f_dist]
+                                                    ]['avg_feature'] = None
+                                if(self.candidates[f_indexes[f_dist]]['out_status'] and self.candidates[f_indexes[f_dist]]['in_count'] is None):
+                                    self.candidates[f_indexes[f_dist]
+                                                    ]['in_count'] = 1
+                                    img = Image.open(frames[i].file)
+                                    img.save(
+                                        "extract_person/IN_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
+                                    SingleCameraTracker.COUNT_IN += 1
+                                else:
+                                    self.candidates[f_indexes[f_dist]
+                                                    ]['in_status'] = True
+                                    c_in_temp = -1
+                            else:
+                                for track2 in self.candidates:
+                                    if (self.tracks[idx]['timestamps'][0] > track2['timestamps'][-1]
+                                            or track2['timestamps'][0] > self.tracks[idx]['timestamps'][-1]):
+                                        if(self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                            track2['boxes'].append(
+                                                self.tracks[-1]['boxes'][-1])
+                                            track2['timestamps'].append(
+                                                self.tracks[-1]['timestamps'][-1])
+                                            track2['features'].append(
+                                                self.tracks[-1]['features'][-1])
+                                            if self.tracks[-1]['features'][-1] is not None:
+                                                track2['f_cluster'].update(
+                                                    features[i])
+                                                if track2['avg_feature'] is None:
+                                                    track2['avg_feature'] = np.zeros(
+                                                        self.tracks[-1]['features'][-1].shape)
+                                                track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) / \
+                                                    len(self.tracks[-1]
+                                                        ['features'])
+                                            else:
+                                                track2['avg_feature'] = None
                                             track2['in_status'] = True
                                             c_in_temp = -1
-                                        break
-                                    elif(self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
-                                        track2['boxes'].append(
-                                            self.tracks[-1]['boxes'][-1])
-                                        track2['timestamps'].append(
-                                            self.tracks[-1]['timestamps'][-1])
-                                        track2['features'].append(
-                                            self.tracks[-1]['features'][-1])
-                                        if self.tracks[-1]['features'][-1] is not None:
-                                            track2['f_cluster'].update(
-                                                features[i])
-                                            if track2['avg_feature'] is None:
-                                                track2['avg_feature'] = np.zeros(
-                                                    self.tracks[-1]['features'][-1].shape)
-                                            track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) / \
-                                                len(self.tracks[-1]
-                                                    ['features'])
-                                        else:
-                                            track2['avg_feature'] = None
-                                        track2['in_status'] = True
-                                        c_in_temp = -1
-                                        break
+                                            break
                             if(c_in_temp == SingleCameraTracker.COUNT_IN):
                                 self.candidates.append(
                                     copy(self.tracks[idx]))
@@ -321,72 +329,81 @@ class SingleCameraTracker:
                         if(self.tracks[idx]['out_status'] == False):
                             self.tracks[idx]['out_status'] = True
                             c_out_temp = SingleCameraTracker.COUNT_OUT
-                            for track2 in self.candidates:
-                                if (self.tracks[idx]['timestamps'][0] > track2['timestamps'][-1]
-                                        or track2['timestamps'][0] > self.tracks[idx]['timestamps'][-1]) \
-                                        and self.tracks[idx]['avg_feature'] is not None and track2['avg_feature'] is not None \
-                                        and self._check_velocity_constraint(self.tracks[idx], track2['boxes'][-1]):
-                                    f_avg_dist = cosine(
-                                        self.tracks[idx]['avg_feature'], track2['avg_feature'])
-                                    f_curr_dist = cosine(
-                                        self.tracks[idx]['feature'][-1], track2['feature'][-1])
-                                    f_clust_dist = clusters_distance(
-                                        self.tracks[idx]['f_cluster'], track2['f_cluster'])
-                                    f_dist = min(
-                                        f_avg_dist, f_curr_dist, f_clust_dist)
-                                    a_size = self.tlbr_to_tlwh(
-                                        self.tracks[idx]['boxes'][-1])
-                                    b_size = self.tlbr_to_tlwh(
-                                        track2['boxes'][-1])
-                                    if(f_dist < 0.1 and abs(a_size[0][0]-b_size[0][0]) < 50 and abs(a_size[0][1]-b_size[0][1]) < 50):
-                                        track2['boxes'].append(
-                                            self.tracks[idx]['boxes'][-1])
-                                        track2['timestamps'].append(
-                                            self.tracks[idx]['timestamps'][-1])
-                                        track2['features'].append(
-                                            self.tracks[idx]['features'][-1])
-                                        if self.tracks[idx]['features'][-1] is not None:
-                                            track2['f_cluster'].update(
-                                                features[i])
-                                            if track2['avg_feature'] is None:
-                                                track2['avg_feature'] = np.zeros(
-                                                    self.tracks[idx]['features'][-1].shape)
-                                            track2['avg_feature'] += (self.tracks[idx]['features'][-1] - track2['avg_feature']) / \
-                                                len(self.tracks[idx]
-                                                    ['features'])
-                                        else:
-                                            track2['avg_feature'] = None
-                                        if(track2['in_status'] and track2['out_count'] is None):
-                                            track2['out_count'] = 1
-                                            SingleCameraTracker.COUNT_OUT += 1
-                                            img = Image.open(frames[i].file)
-                                            img.save(
-                                                "extract_person/OUT_{}.jpg".format(self.time+track2['id']))
-                                        else:
-                                            track2['out_status'] = True
+                            list_curr_f = [feature['feature'][-1]
+                                           for feature in self.candidates]
+                            list_avg_f = [feature['avg_feature'][-1]
+                                          for feature in self.candidates]
+                            list_clus_f = [feature['f_cluster'][-1]
+                                           for feature in self.candidates]
+                            distances_f = cdist(self.tracks[idx]['feature'][-1].reshape(1, -1),
+                                                np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
+                            nearest_idx_f = np.argmin(distances_f)
+                            distances_avg_f = cdist(self.tracks[idx]['feature'][-1].reshape(1, -1),
+                                                    np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
+                            nearest_idx_avg = np.argmin(distances_avg_f)
+                            distances_clus_f = cdist(self.tracks[idx]['feature'][-1].reshape(1, -1),
+                                                     np.array(list_clus_f).reshape(len(list_clus_f), -1), 'cosine')
+                            nearest_idx_clus = np.argmin(distances_clus_f)
+                            distances = [
+                                distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], distances_clus_f[nearest_idx_clus]]
+                            f_indexes = [nearest_idx_f,
+                                         nearest_idx_avg, nearest_idx_clus]
+                            f_dist = distances.index(min(distances))
+                            if(distances[f_dist] < 0.1):
+                                self.candidates[f_indexes[f_dist]]['boxes'].append(
+                                    self.tracks[idx]['boxes'][-1])
+                                self.candidates[f_indexes[f_dist]]['timestamps'].append(
+                                    self.tracks[idx]['timestamps'][-1])
+                                self.candidates[f_indexes[f_dist]]['features'].append(
+                                    self.tracks[idx]['features'][-1])
+                                if self.tracks[idx]['features'][-1] is not None:
+                                    self.candidates[f_indexes[f_dist]]['f_cluster'].update(
+                                        features[i])
+                                    if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
+                                        self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
+                                            self.tracks[idx]['features'][-1].shape)
+                                    self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[idx]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
+                                        len(self.tracks[idx]
+                                            ['features'])
+                                else:
+                                    self.candidates[f_indexes[f_dist]
+                                                    ]['avg_feature'] = None
+                                if(self.candidates[f_indexes[f_dist]]['out_status'] and self.candidates[f_indexes[f_dist]]['in_count'] is None):
+                                    self.candidates[f_indexes[f_dist]
+                                                    ]['in_count'] = 1
+                                    img = Image.open(frames[i].file)
+                                    img.save(
+                                        "extract_person/IN_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
+                                    SingleCameraTracker.COUNT_IN += 1
+                                else:
+                                    self.candidates[f_indexes[f_dist]
+                                                    ]['in_status'] = True
+                                    c_out_temp = -1
+                            else:
+                                for track2 in self.candidates:
+                                    if (self.tracks[idx]['timestamps'][0] > track2['timestamps'][-1]
+                                            or track2['timestamps'][0] > self.tracks[idx]['timestamps'][-1]):
+                                        if(self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                            track2['boxes'].append(
+                                                self.tracks[-1]['boxes'][-1])
+                                            track2['timestamps'].append(
+                                                self.tracks[-1]['timestamps'][-1])
+                                            track2['features'].append(
+                                                self.tracks[-1]['features'][-1])
+                                            if self.tracks[-1]['features'][-1] is not None:
+                                                track2['f_cluster'].update(
+                                                    features[i])
+                                                if track2['avg_feature'] is None:
+                                                    track2['avg_feature'] = np.zeros(
+                                                        self.tracks[-1]['features'][-1].shape)
+                                                track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) / \
+                                                    len(self.tracks[-1]
+                                                        ['features'])
+                                            else:
+                                                track2['avg_feature'] = None
+                                            track2['in_status'] = True
                                             c_out_temp = -1
-                                        break
-                                    elif(self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
-                                        track2['boxes'].append(
-                                            self.tracks[-1]['boxes'][-1])
-                                        track2['timestamps'].append(
-                                            self.tracks[-1]['timestamps'][-1])
-                                        track2['features'].append(
-                                            self.tracks[-1]['features'][-1])
-                                        if self.tracks[-1]['features'][-1] is not None:
-                                            track2['f_cluster'].update(
-                                                features[i])
-                                            if track2['avg_feature'] is None:
-                                                track2['avg_feature'] = np.zeros(
-                                                    self.tracks[-1]['features'][-1].shape)
-                                            track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) / \
-                                                len(self.tracks[-1]
-                                                    ['features'])
-                                        else:
-                                            track2['avg_feature'] = None
-                                        track2['out_status'] = True
-                                        c_out_temp = -1
-                                        break
+                                            break
                             if(c_out_temp == SingleCameraTracker.COUNT_OUT):
                                 self.candidates.append(
                                     copy(self.tracks[idx]))
@@ -577,67 +594,81 @@ class SingleCameraTracker:
                     if(self.tracks[-1]['in_status'] == False):
                         self.tracks[-1]['in_status'] = True
                         c_in_temp = SingleCameraTracker.COUNT_IN
-                        for track2 in self.candidates:
-                            if (self.tracks[-1]['timestamps'][0] > track2['timestamps'][-1]
-                                    or track2['timestamps'][0] > self.tracks[-1]['timestamps'][-1]) \
-                                    and self.tracks[-1]['avg_feature'] is not None and track2['avg_feature'] is not None \
-                                    and self._check_velocity_constraint(self.tracks[-1], track2['boxes'][-1]):
-                                f_avg_dist = cosine(
-                                    self.tracks[-1]['avg_feature'], track2['avg_feature'])
-                                f_curr_dist = cosine(
-                                    self.tracks[-1]['feature'][-1], track2['feature'][-1])
-                                f_clust_dist = clusters_distance(
-                                    self.tracks[-1]['f_cluster'], track2['f_cluster'])
-                                f_dist = min(
-                                    f_avg_dist, f_curr_dist, f_clust_dist)
-                                a_size = self.tlbr_to_tlwh(
-                                    self.tracks[-1]['boxes'][-1])
-                                b_size = self.tlbr_to_tlwh(track2['boxes'][-1])
-                                if(f_dist < 0.1 and abs(a_size[0][0]-b_size[0][0]) < 50 and abs(a_size[0][1]-b_size[0][1]) < 50):
-                                    track2['boxes'].append(
-                                        self.tracks[-1]['boxes'][-1])
-                                    track2['timestamps'].append(
-                                        self.tracks[-1]['timestamps'][-1])
-                                    track2['features'].append(
-                                        self.tracks[-1]['features'][-1])
-                                    if self.tracks[-1]['features'][-1] is not None:
-                                        track2['f_cluster'].update(features[i])
-                                        if track2['avg_feature'] is None:
-                                            track2['avg_feature'] = np.zeros(
-                                                self.tracks[-1]['features'][-1].shape)
-                                        track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) / \
-                                            len(self.tracks[-1]['features'])
-                                    else:
-                                        track2['avg_feature'] = None
-                                    if(track2['out_status'] and track2['in_count'] is None):
-                                        track2['in_count'] = 1
-                                        SingleCameraTracker.COUNT_IN += 1
-                                        img = Image.open(frames[i].file)
-                                        img.save(
-                                            "extract_person/IN_{}_F.jpg".format(self.time+track2['id']))
-                                    else:
+                        list_curr_f = [feature['feature'][-1]
+                                       for feature in self.candidates]
+                        list_avg_f = [feature['avg_feature'][-1]
+                                      for feature in self.candidates]
+                        list_clus_f = [feature['f_cluster'][-1]
+                                       for feature in self.candidates]
+                        distances_f = cdist(self.tracks[-1]['feature'][-1].reshape(1, -1),
+                                            np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
+                        nearest_idx_f = np.argmin(distances_f)
+                        distances_avg_f = cdist(self.tracks[-1]['feature'][-1].reshape(1, -1),
+                                                np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
+                        nearest_idx_avg = np.argmin(distances_avg_f)
+                        distances_clus_f = cdist(self.tracks[-1]['feature'][-1].reshape(1, -1),
+                                                 np.array(list_clus_f).reshape(len(list_clus_f), -1), 'cosine')
+                        nearest_idx_clus = np.argmin(distances_clus_f)
+                        distances = [
+                            distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], distances_clus_f[nearest_idx_clus]]
+                        f_indexes = [nearest_idx_f,
+                                     nearest_idx_avg, nearest_idx_clus]
+                        f_dist = distances.index(min(distances))
+                        if(distances[f_dist] < 0.1):
+                            self.candidates[f_indexes[f_dist]]['boxes'].append(
+                                self.tracks[-1]['boxes'][-1])
+                            self.candidates[f_indexes[f_dist]]['timestamps'].append(
+                                self.tracks[-1]['timestamps'][-1])
+                            self.candidates[f_indexes[f_dist]]['features'].append(
+                                self.tracks[-1]['features'][-1])
+                            if self.tracks[-1]['features'][-1] is not None:
+                                self.candidates[f_indexes[f_dist]]['f_cluster'].update(
+                                    features[i])
+                                if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
+                                    self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
+                                        self.tracks[-1]['features'][-1].shape)
+                                self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[-1]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
+                                    len(self.tracks[-1]
+                                        ['features'])
+                            else:
+                                self.candidates[f_indexes[f_dist]
+                                                ]['avg_feature'] = None
+                            if(self.candidates[f_indexes[f_dist]]['out_status'] and self.candidates[f_indexes[f_dist]]['in_count'] is None):
+                                self.candidates[f_indexes[f_dist]
+                                                ]['in_count'] = 1
+                                img = Image.open(frames[i].file)
+                                img.save(
+                                    "extract_person/IN_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
+                                SingleCameraTracker.COUNT_IN += 1
+                            else:
+                                self.candidates[f_indexes[f_dist]
+                                                ]['in_status'] = True
+                                c_in_temp = -1
+                        else:
+                            for track2 in self.candidates:
+                                if (self.tracks[-1]['timestamps'][0] > track2['timestamps'][-1]
+                                        or track2['timestamps'][0] > self.tracks[-1]['timestamps'][-1]):
+                                    if(self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                        track2['boxes'].append(
+                                            self.tracks[-1]['boxes'][-1])
+                                        track2['timestamps'].append(
+                                            self.tracks[-1]['timestamps'][-1])
+                                        track2['features'].append(
+                                            self.tracks[-1]['features'][-1])
+                                        if self.tracks[-1]['features'][-1] is not None:
+                                            track2['f_cluster'].update(
+                                                features[i])
+                                            if track2['avg_feature'] is None:
+                                                track2['avg_feature'] = np.zeros(
+                                                    self.tracks[-1]['features'][-1].shape)
+                                            track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) / \
+                                                len(self.tracks[-1]
+                                                    ['features'])
+                                        else:
+                                            track2['avg_feature'] = None
                                         track2['in_status'] = True
                                         c_in_temp = -1
-                                    break
-                                elif(self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
-                                    track2['boxes'].append(
-                                        self.tracks[-1]['boxes'][-1])
-                                    track2['timestamps'].append(
-                                        self.tracks[-1]['timestamps'][-1])
-                                    track2['features'].append(
-                                        self.tracks[-1]['features'][-1])
-                                    if self.tracks[-1]['features'][-1] is not None:
-                                        track2['f_cluster'].update(features[i])
-                                        if track2['avg_feature'] is None:
-                                            track2['avg_feature'] = np.zeros(
-                                                self.tracks[-1]['features'][-1].shape)
-                                        track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) / \
-                                            len(self.tracks[-1]['features'])
-                                    else:
-                                        track2['avg_feature'] = None
-                                    track2['in_status'] = True
-                                    c_in_temp = -1
-                                    break
+                                        break
                         if(c_in_temp == SingleCameraTracker.COUNT_IN):
                             self.candidates.append(
                                 copy(self.tracks[-1]))
@@ -645,67 +676,81 @@ class SingleCameraTracker:
                     if(self.tracks[-1]['out_status'] == False):
                         self.tracks[-1]['out_status'] = True
                         c_out_temp = SingleCameraTracker.COUNT_OUT
-                        for track2 in self.candidates:
-                            if (self.tracks[-1]['timestamps'][0] > track2['timestamps'][-1]
-                                    or track2['timestamps'][0] > self.tracks[-1]['timestamps'][-1]) \
-                                    and self.tracks[-1]['avg_feature'] is not None and track2['avg_feature'] is not None \
-                                    and self._check_velocity_constraint(self.tracks[-1], track2['boxes'][-1]):
-                                f_avg_dist = cosine(
-                                    self.tracks[-1]['avg_feature'], track2['avg_feature'])
-                                f_curr_dist = cosine(
-                                    self.tracks[-1]['feature'][-1], track2['feature'][-1])
-                                f_clust_dist = clusters_distance(
-                                    self.tracks[-1]['f_cluster'], track2['f_cluster'])
-                                f_dist = min(
-                                    f_avg_dist, f_curr_dist, f_clust_dist)
-                                a_size = self.tlbr_to_tlwh(
-                                    self.tracks[-1]['boxes'][-1])
-                                b_size = self.tlbr_to_tlwh(track2['boxes'][-1])
-                                if(f_dist < 0.1 and abs(a_size[0][0]-b_size[0][0]) < 50 and abs(a_size[0][1]-b_size[0][1]) < 50):
-                                    track2['boxes'].append(
-                                        self.tracks[-1]['boxes'][-1])
-                                    track2['timestamps'].append(
-                                        self.tracks[-1]['timestamps'][-1])
-                                    track2['features'].append(
-                                        self.tracks[-1]['features'][-1])
-                                    if self.tracks[-1]['features'][-1] is not None:
-                                        track2['f_cluster'].update(features[i])
-                                        if track2['avg_feature'] is None:
-                                            track2['avg_feature'] = np.zeros(
-                                                self.tracks[-1]['features'][-1].shape)
-                                        track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) / len(
-                                            self.tracks[-1]['features'])
-                                    else:
-                                        track2['avg_feature'] = None
-                                    if(track2['in_status'] and track2['out_count'] is None):
-                                        track2['out_count'] = 1
-                                        SingleCameraTracker.COUNT_OUT += 1
-                                        img = Image.open(frames[i].file)
-                                        img.save(
-                                            "extract_person/OUT_{}_F.jpg".format(self.time+track2['id']))
-                                    else:
-                                        track2['out_status'] = True
+                        list_curr_f = [feature['feature'][-1]
+                                       for feature in self.candidates]
+                        list_avg_f = [feature['avg_feature'][-1]
+                                      for feature in self.candidates]
+                        list_clus_f = [feature['f_cluster'][-1]
+                                       for feature in self.candidates]
+                        distances_f = cdist(self.tracks[-1]['feature'][-1].reshape(1, -1),
+                                            np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
+                        nearest_idx_f = np.argmin(distances_f)
+                        distances_avg_f = cdist(self.tracks[-1]['feature'][-1].reshape(1, -1),
+                                                np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
+                        nearest_idx_avg = np.argmin(distances_avg_f)
+                        distances_clus_f = cdist(self.tracks[-1]['feature'][-1].reshape(1, -1),
+                                                 np.array(list_clus_f).reshape(len(list_clus_f), -1), 'cosine')
+                        nearest_idx_clus = np.argmin(distances_clus_f)
+                        distances = [
+                            distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], distances_clus_f[nearest_idx_clus]]
+                        f_indexes = [nearest_idx_f,
+                                     nearest_idx_avg, nearest_idx_clus]
+                        f_dist = distances.index(min(distances))
+                        if(distances[f_dist] < 0.1):
+                            self.candidates[f_indexes[f_dist]]['boxes'].append(
+                                self.tracks[-1]['boxes'][-1])
+                            self.candidates[f_indexes[f_dist]]['timestamps'].append(
+                                self.tracks[-1]['timestamps'][-1])
+                            self.candidates[f_indexes[f_dist]]['features'].append(
+                                self.tracks[-1]['features'][-1])
+                            if self.tracks[-1]['features'][-1] is not None:
+                                self.candidates[f_indexes[f_dist]]['f_cluster'].update(
+                                    features[i])
+                                if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
+                                    self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
+                                        self.tracks[-1]['features'][-1].shape)
+                                self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[-1]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
+                                    len(self.tracks[-1]
+                                        ['features'])
+                            else:
+                                self.candidates[f_indexes[f_dist]
+                                                ]['avg_feature'] = None
+                            if(self.candidates[f_indexes[f_dist]]['out_status'] and self.candidates[f_indexes[f_dist]]['in_count'] is None):
+                                self.candidates[f_indexes[f_dist]
+                                                ]['in_count'] = 1
+                                img = Image.open(frames[i].file)
+                                img.save(
+                                    "extract_person/IN_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
+                                SingleCameraTracker.COUNT_IN += 1
+                            else:
+                                self.candidates[f_indexes[f_dist]
+                                                ]['in_status'] = True
+                                c_out_temp = -1
+                        else:
+                            for track2 in self.candidates:
+                                if (self.tracks[-1]['timestamps'][0] > track2['timestamps'][-1]
+                                        or track2['timestamps'][0] > self.tracks[-1]['timestamps'][-1]):
+                                    if(self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
+                                        track2['boxes'].append(
+                                            self.tracks[-1]['boxes'][-1])
+                                        track2['timestamps'].append(
+                                            self.tracks[-1]['timestamps'][-1])
+                                        track2['features'].append(
+                                            self.tracks[-1]['features'][-1])
+                                        if self.tracks[-1]['features'][-1] is not None:
+                                            track2['f_cluster'].update(
+                                                features[i])
+                                            if track2['avg_feature'] is None:
+                                                track2['avg_feature'] = np.zeros(
+                                                    self.tracks[-1]['features'][-1].shape)
+                                            track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) / \
+                                                len(self.tracks[-1]
+                                                    ['features'])
+                                        else:
+                                            track2['avg_feature'] = None
+                                        track2['in_status'] = True
                                         c_out_temp = -1
-                                    break
-                                elif(self._giou(self.tracks[-1]['boxes'][-1], track2['boxes'][-1]) > self.track_detection_iou_thresh):
-                                    track2['boxes'].append(
-                                        self.tracks[-1]['boxes'][-1])
-                                    track2['timestamps'].append(
-                                        self.tracks[-1]['timestamps'][-1])
-                                    track2['features'].append(
-                                        self.tracks[-1]['features'][-1])
-                                    if self.tracks[-1]['features'][-1] is not None:
-                                        track2['f_cluster'].update(features[i])
-                                        if track2['avg_feature'] is None:
-                                            track2['avg_feature'] = np.zeros(
-                                                self.tracks[-1]['features'][-1].shape)
-                                        track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) / \
-                                            len(self.tracks[-1]['features'])
-                                    else:
-                                        track2['avg_feature'] = None
-                                    track2['out_status'] = True
-                                    c_out_temp = -1
-                                    break
+                                        break
                         if(c_out_temp == SingleCameraTracker.COUNT_OUT):
                             self.candidates.append(
                                 copy(self.tracks[-1]))
