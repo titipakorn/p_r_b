@@ -594,8 +594,7 @@ class SingleCameraTracker:
                                         if track2['avg_feature'] is None:
                                             track2['avg_feature'] = np.zeros(
                                                 self.tracks[-1]['features'][-1].shape)
-                                        track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) /
-                                        len(self.tracks[-1]['features'])
+                                        track2['avg_feature'] += (self.tracks[-1]['features'][-1] - track2['avg_feature']) /len(self.tracks[-1]['features'])
                                     else:
                                         track2['avg_feature'] = None
                                     if(track2['in_status'] and track2['out_count'] is None):
