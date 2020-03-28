@@ -36,9 +36,9 @@ class Config(DefaultConfig):
         self.RERANKING = True
 
         self.sct_config = dict(
-            time_window=30/3,
-            continue_time_thresh=60/3,
-            track_clear_thresh=300/3,
+            time_window=30/2,
+            continue_time_thresh=60/2,
+            track_clear_thresh=300/2,
             match_threshold=0.475,
             merge_thresh=0.3,
             n_clusters=4,
