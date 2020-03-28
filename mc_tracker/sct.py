@@ -250,9 +250,9 @@ class SingleCameraTracker:
                             if(len(self.candidates) > 0):
                                 list_curr_f = [feature['features'][-1]
                                                for feature in self.candidates]
-                                list_avg_f = [feature['avg_feature'][-1]
+                                list_avg_f = [feature['avg_feature']
                                               for feature in self.candidates]
-                                list_clus_f = [feature['f_cluster'][-1]
+                                list_clus_f = [feature['f_cluster']
                                                for feature in self.candidates]
                                 distances_f = cdist(self.tracks[idx]['features'][-1].reshape(1, -1),
                                                     np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
@@ -333,9 +333,9 @@ class SingleCameraTracker:
                             if(len(self.candidates) > 0):
                                 list_curr_f = [feature['features'][-1]
                                                for feature in self.candidates]
-                                list_avg_f = [feature['avg_feature'][-1]
+                                list_avg_f = [feature['avg_feature']
                                               for feature in self.candidates]
-                                list_clus_f = [feature['f_cluster'][-1]
+                                list_clus_f = [feature['f_cluster']
                                                for feature in self.candidates]
                                 distances_f = cdist(self.tracks[idx]['features'][-1].reshape(1, -1),
                                                     np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
@@ -581,9 +581,9 @@ class SingleCameraTracker:
                         if(len(self.candidates) > 0):
                             list_curr_f = [feature['features'][-1]
                                            for feature in self.candidates]
-                            list_avg_f = [feature['avg_feature'][-1]
+                            list_avg_f = [feature['avg_feature']
                                           for feature in self.candidates]
-                            list_clus_f = [feature['f_cluster'][-1]
+                            list_clus_f = [feature['f_cluster']
                                            for feature in self.candidates]
                             distances_f = cdist(self.tracks[-1]['features'][-1].reshape(1, -1),
                                                 np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
@@ -664,9 +664,9 @@ class SingleCameraTracker:
                         if(len(self.candidates) > 0):
                             list_curr_f = [feature['features'][-1]
                                            for feature in self.candidates]
-                            list_avg_f = [feature['avg_feature'][-1]
+                            list_avg_f = [feature['avg_feature']
                                           for feature in self.candidates]
-                            list_clus_f = [feature['f_cluster'][-1]
+                            list_clus_f = [feature['f_cluster']
                                            for feature in self.candidates]
                             distances_f = cdist(self.tracks[-1]['features'][-1].reshape(1, -1),
                                                 np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
