@@ -255,11 +255,17 @@ class SingleCameraTracker:
                                         and self._check_velocity_constraint(self.tracks[idx], track2['boxes'][-1]):
                                     f_avg_dist = cosine(
                                         self.tracks[idx]['avg_feature'], track2['avg_feature'])
+                                    f_curr_dist = cosine(
+                                        self.tracks[idx]['feature'][-1], track2['feature'][-1])
                                     f_clust_dist = clusters_distance(
                                         self.tracks[idx]['f_cluster'], track2['f_cluster'])
                                     f_dist = min(
-                                        f_avg_dist, f_clust_dist)
-                                    if(f_dist < 0.1):
+                                        f_avg_dist, f_curr_dist, f_clust_dist)
+                                    a_size = self.tlbr_to_tlwh(
+                                        self.tracks[idx]['boxes'][-1])
+                                    b_size = self.tlbr_to_tlwh(
+                                        track2['boxes'][-1])
+                                    if(f_dist < 0.1 and abs(a_size[0][0]-b_size[0][0]) < 50 and abs(a_size[0][1]-b_size[0][1]) < 50):
                                         track2['boxes'].append(
                                             self.tracks[idx]['boxes'][-1])
                                         track2['timestamps'].append(
@@ -322,11 +328,17 @@ class SingleCameraTracker:
                                         and self._check_velocity_constraint(self.tracks[idx], track2['boxes'][-1]):
                                     f_avg_dist = cosine(
                                         self.tracks[idx]['avg_feature'], track2['avg_feature'])
+                                    f_curr_dist = cosine(
+                                        self.tracks[idx]['feature'][-1], track2['feature'][-1])
                                     f_clust_dist = clusters_distance(
                                         self.tracks[idx]['f_cluster'], track2['f_cluster'])
                                     f_dist = min(
-                                        f_avg_dist, f_clust_dist)
-                                    if(f_dist < 0.1):
+                                        f_avg_dist, f_curr_dist, f_clust_dist)
+                                    a_size = self.tlbr_to_tlwh(
+                                        self.tracks[idx]['boxes'][-1])
+                                    b_size = self.tlbr_to_tlwh(
+                                        track2['boxes'][-1])
+                                    if(f_dist < 0.1 and abs(a_size[0][0]-b_size[0][0]) < 50 and abs(a_size[0][1]-b_size[0][1]) < 50):
                                         track2['boxes'].append(
                                             self.tracks[idx]['boxes'][-1])
                                         track2['timestamps'].append(
@@ -572,11 +584,16 @@ class SingleCameraTracker:
                                     and self._check_velocity_constraint(self.tracks[-1], track2['boxes'][-1]):
                                 f_avg_dist = cosine(
                                     self.tracks[-1]['avg_feature'], track2['avg_feature'])
+                                f_curr_dist = cosine(
+                                    self.tracks[-1]['feature'][-1], track2['feature'][-1])
                                 f_clust_dist = clusters_distance(
                                     self.tracks[-1]['f_cluster'], track2['f_cluster'])
                                 f_dist = min(
-                                    f_avg_dist, f_clust_dist)
-                                if(f_dist < 0.1):
+                                    f_avg_dist, f_curr_dist, f_clust_dist)
+                                a_size = self.tlbr_to_tlwh(
+                                    self.tracks[-1]['boxes'][-1])
+                                b_size = self.tlbr_to_tlwh(track2['boxes'][-1])
+                                if(f_dist < 0.1 and abs(a_size[0][0]-b_size[0][0]) < 50 and abs(a_size[0][1]-b_size[0][1]) < 50):
                                     track2['boxes'].append(
                                         self.tracks[-1]['boxes'][-1])
                                     track2['timestamps'].append(
@@ -635,11 +652,16 @@ class SingleCameraTracker:
                                     and self._check_velocity_constraint(self.tracks[-1], track2['boxes'][-1]):
                                 f_avg_dist = cosine(
                                     self.tracks[-1]['avg_feature'], track2['avg_feature'])
+                                f_curr_dist = cosine(
+                                    self.tracks[-1]['feature'][-1], track2['feature'][-1])
                                 f_clust_dist = clusters_distance(
                                     self.tracks[-1]['f_cluster'], track2['f_cluster'])
                                 f_dist = min(
-                                    f_avg_dist, f_clust_dist)
-                                if(f_dist < 0.1):
+                                    f_avg_dist, f_curr_dist, f_clust_dist)
+                                a_size = self.tlbr_to_tlwh(
+                                    self.tracks[-1]['boxes'][-1])
+                                b_size = self.tlbr_to_tlwh(track2['boxes'][-1])
+                                if(f_dist < 0.1 and abs(a_size[0][0]-b_size[0][0]) < 50 and abs(a_size[0][1]-b_size[0][1]) < 50):
                                     track2['boxes'].append(
                                         self.tracks[-1]['boxes'][-1])
                                     track2['timestamps'].append(
