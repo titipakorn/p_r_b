@@ -36,13 +36,13 @@ class Config(DefaultConfig):
         self.RERANKING = True
 
         self.sct_config = dict(
-            time_window=30/2,
-            continue_time_thresh=60/2,
-            track_clear_thresh=300/2,
+            time_window=30/4,
+            continue_time_thresh=60/4,
+            track_clear_thresh=300/4,
             match_threshold=0.475,
             merge_thresh=0.3,
             n_clusters=4,
-            max_bbox_velocity=0.3,
+            max_bbox_velocity=0.4,
             detection_occlusion_thresh=0.7,
             track_detection_iou_thresh=0.3
         )
