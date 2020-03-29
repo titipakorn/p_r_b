@@ -131,7 +131,7 @@ class SingleCameraTracker:
         self.detection_occlusion_thresh = detection_occlusion_thresh
         self.track_detection_iou_thresh = track_detection_iou_thresh
         self.data_transform = transforms.Compose([
-            transforms.Resize([128, 64]),
+            transforms.Resize([64, 128]),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[
                                  0.229, 0.224, 0.225]),
