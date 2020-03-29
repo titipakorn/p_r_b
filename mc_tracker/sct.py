@@ -581,19 +581,19 @@ class SingleCameraTracker:
                                            for feature in self.candidates]
                             list_avg_f = [feature['avg_feature']
                                           for feature in self.candidates]
-                            list_clus_f = np.array([clusters_vec_distance(feature['f_cluster'], self.tracks[-1]['features'][-1])
-                                                    for feature in self.candidates])
+                            # list_clus_f = np.array([clusters_vec_distance(feature['f_cluster'], self.tracks[-1]['features'][-1])
+                            #                         for feature in self.candidates])
                             distances_f = cdist(self.tracks[-1]['features'][-1].reshape(1, -1),
                                                 np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
                             nearest_idx_f = np.argmin(distances_f)
                             distances_avg_f = cdist(self.tracks[-1]['features'][-1].reshape(1, -1),
                                                     np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
                             nearest_idx_avg = np.argmin(distances_avg_f)
-                            nearest_idx_clus = np.argmin(list_clus_f)
+                            #nearest_idx_clus = np.argmin(list_clus_f)
                             distances = np.array([
-                                distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]])
+                                distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg]])
                             f_indexes = [nearest_idx_f,
-                                         nearest_idx_avg, nearest_idx_clus]
+                                         nearest_idx_avg]
                             f_dist = np.argmin(distances)
                             if(distances[f_dist] < self.rectify_thresh):
                                 self.candidates[f_indexes[f_dist]]['boxes'].append(
@@ -662,19 +662,19 @@ class SingleCameraTracker:
                                            for feature in self.candidates]
                             list_avg_f = [feature['avg_feature']
                                           for feature in self.candidates]
-                            list_clus_f = np.array([clusters_vec_distance(feature['f_cluster'], self.tracks[-1]['features'][-1])
-                                                    for feature in self.candidates])
+                            # list_clus_f = np.array([clusters_vec_distance(feature['f_cluster'], self.tracks[-1]['features'][-1])
+                            #                         for feature in self.candidates])
                             distances_f = cdist(self.tracks[-1]['features'][-1].reshape(1, -1),
                                                 np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
                             nearest_idx_f = np.argmin(distances_f)
                             distances_avg_f = cdist(self.tracks[-1]['features'][-1].reshape(1, -1),
                                                     np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
                             nearest_idx_avg = np.argmin(distances_avg_f)
-                            nearest_idx_clus = np.argmin(list_clus_f)
+                            #nearest_idx_clus = np.argmin(list_clus_f)
                             distances = np.array([
-                                distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]])
+                                distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg]])
                             f_indexes = [nearest_idx_f,
-                                         nearest_idx_avg, nearest_idx_clus]
+                                         nearest_idx_avg]
                             f_dist = np.argmin(distances)
                             if(distances[f_dist] < self.rectify_thresh):
                                 self.candidates[f_indexes[f_dist]]['boxes'].append(
