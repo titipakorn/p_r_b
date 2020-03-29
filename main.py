@@ -74,6 +74,14 @@ def read_status():
     return {"counting_in": SingleCameraTracker.COUNT_IN, "counting_out": SingleCameraTracker.COUNT_OUT, "date": parsed_date, "time": parsed_time}
 
 
+@app.get("/reset/")
+def reset():
+    SingleCameraTracker.COUNT_IN = 0
+    SingleCameraTracker.COUNT_OUT = 0
+    tracker = MultiCameraTracker(number_of_cameras, reid, config)
+    return {"status": "success"}
+
+
 @app.post("/track/")
 async def update_track(bboxes: str = Body(..., embed=True), files: List[UploadFile] = File(...)):
     #time_str = time.strftime(TIME_FM)
