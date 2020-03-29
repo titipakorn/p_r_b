@@ -252,7 +252,7 @@ class SingleCameraTracker:
                             if(len(self.candidates) > 0):
                                 list_curr_f = [feature['features'][-1]
                                                for feature in self.candidates]
-                                list_avg_f = [feature[' ']
+                                list_avg_f = [feature['avg_feature']
                                               for feature in self.candidates]
                                 list_clus_f = np.array([clusters_vec_distance(feature['f_cluster'], self.tracks[idx]['features'][-1])
                                                         for feature in self.candidates])
