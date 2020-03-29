@@ -13,6 +13,8 @@ from PIL import Image
 from fastapi import FastAPI, File, UploadFile, Body
 from fastapi.responses import HTMLResponse
 
+import torch
+
 # CONFIG
 from config import Config
 from mc_tracker.mct import MultiCameraTracker
@@ -79,6 +81,7 @@ def reset():
     SingleCameraTracker.COUNT_IN = 0
     SingleCameraTracker.COUNT_OUT = 0
     tracker = MultiCameraTracker(number_of_cameras, reid, config)
+    torch.cuda.empty_cache()
     return {"status": "success"}
 
 

@@ -254,16 +254,15 @@ class SingleCameraTracker:
                                                for feature in self.candidates]
                                 list_avg_f = [feature['avg_feature']
                                               for feature in self.candidates]
-                                list_clus_f = [clusters_vec_distance(feature['f_cluster'], self.tracks[idx]['features'][-1])
-                                               for feature in self.candidates]
+                                list_clus_f = np.array([clusters_vec_distance(feature['f_cluster'], self.tracks[idx]['features'][-1])
+                                                        for feature in self.candidates])
                                 distances_f = cdist(self.tracks[idx]['features'][-1].reshape(1, -1),
                                                     np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
                                 nearest_idx_f = np.argmin(distances_f)
                                 distances_avg_f = cdist(self.tracks[idx]['features'][-1].reshape(1, -1),
                                                         np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
                                 nearest_idx_avg = np.argmin(distances_avg_f)
-                                nearest_idx_clus = list_clus_f.index(
-                                    min(list_clus_f))
+                                nearest_idx_clus = np.argmin(list_clus_f)
                                 distances = [
                                     distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]]
                                 f_indexes = [nearest_idx_f,
@@ -336,16 +335,15 @@ class SingleCameraTracker:
                                                for feature in self.candidates]
                                 list_avg_f = [feature['avg_feature']
                                               for feature in self.candidates]
-                                list_clus_f = [clusters_vec_distance(feature['f_cluster'], self.tracks[idx]['features'][-1])
-                                               for feature in self.candidates]
+                                list_clus_f = np.array([clusters_vec_distance(feature['f_cluster'], self.tracks[idx]['features'][-1])
+                                                        for feature in self.candidates])
                                 distances_f = cdist(self.tracks[idx]['features'][-1].reshape(1, -1),
                                                     np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
                                 nearest_idx_f = np.argmin(distances_f)
                                 distances_avg_f = cdist(self.tracks[idx]['features'][-1].reshape(1, -1),
                                                         np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
                                 nearest_idx_avg = np.argmin(distances_avg_f)
-                                nearest_idx_clus = list_clus_f.index(
-                                    min(list_clus_f))
+                                nearest_idx_clus = np.argmin(list_clus_f)
                                 distances = [
                                     distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]]
                                 f_indexes = [nearest_idx_f,
@@ -583,16 +581,15 @@ class SingleCameraTracker:
                                            for feature in self.candidates]
                             list_avg_f = [feature['avg_feature']
                                           for feature in self.candidates]
-                            list_clus_f = [clusters_vec_distance(feature['f_cluster'], self.tracks[-1]['features'][-1])
-                                           for feature in self.candidates]
+                            list_clus_f = np.array([clusters_vec_distance(feature['f_cluster'], self.tracks[-1]['features'][-1])
+                                                    for feature in self.candidates])
                             distances_f = cdist(self.tracks[-1]['features'][-1].reshape(1, -1),
                                                 np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
                             nearest_idx_f = np.argmin(distances_f)
                             distances_avg_f = cdist(self.tracks[-1]['features'][-1].reshape(1, -1),
                                                     np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
                             nearest_idx_avg = np.argmin(distances_avg_f)
-                            nearest_idx_clus = list_clus_f.index(
-                                min(list_clus_f))
+                            nearest_idx_clus = np.argmin(list_clus_f)
                             distances = [
                                 distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]]
                             f_indexes = [nearest_idx_f,
@@ -665,16 +662,15 @@ class SingleCameraTracker:
                                            for feature in self.candidates]
                             list_avg_f = [feature['avg_feature']
                                           for feature in self.candidates]
-                            list_clus_f = [clusters_vec_distance(feature['f_cluster'], self.tracks[-1]['features'][-1])
-                                           for feature in self.candidates]
+                            list_clus_f = np.array([clusters_vec_distance(feature['f_cluster'], self.tracks[-1]['features'][-1])
+                                                    for feature in self.candidates])
                             distances_f = cdist(self.tracks[-1]['features'][-1].reshape(1, -1),
                                                 np.array(list_curr_f).reshape(len(list_curr_f), -1), 'cosine')
                             nearest_idx_f = np.argmin(distances_f)
                             distances_avg_f = cdist(self.tracks[-1]['features'][-1].reshape(1, -1),
                                                     np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
                             nearest_idx_avg = np.argmin(distances_avg_f)
-                            nearest_idx_clus = list_clus_f.index(
-                                min(list_clus_f))
+                            nearest_idx_clus = np.argmin(list_clus_f)
                             distances = [
                                 distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]]
                             f_indexes = [nearest_idx_f,
