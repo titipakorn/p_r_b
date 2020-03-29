@@ -108,6 +108,7 @@ class SingleCameraTracker:
                  match_threshold=0.4,
                  merge_thresh=0.35,
                  n_clusters=4,
+                 rectify_thresh=0.1,
                  max_bbox_velocity=0.2,
                  detection_occlusion_thresh=0.7,
                  track_detection_iou_thresh=0.5, p_in=[], p_out=[]):
@@ -126,6 +127,7 @@ class SingleCameraTracker:
         self.track_clear_thresh = track_clear_thresh
         self.match_threshold = match_threshold
         self.merge_thresh = merge_thresh
+        self.rectify_thresh = rectify_thresh
         self.n_clusters = n_clusters
         self.max_bbox_velocity = max_bbox_velocity
         self.detection_occlusion_thresh = detection_occlusion_thresh
@@ -267,7 +269,7 @@ class SingleCameraTracker:
                                 f_indexes = [nearest_idx_f,
                                              nearest_idx_avg, nearest_idx_clus]
                                 f_dist = distances.index(min(distances))
-                                if(distances[f_dist] < 0.1):
+                                if(distances[f_dist] < self.rectify_thresh):
                                     self.candidates[f_indexes[f_dist]]['boxes'].append(
                                         self.tracks[idx]['boxes'][-1])
                                     self.candidates[f_indexes[f_dist]]['timestamps'].append(
@@ -349,7 +351,7 @@ class SingleCameraTracker:
                                 f_indexes = [nearest_idx_f,
                                              nearest_idx_avg, nearest_idx_clus]
                                 f_dist = distances.index(min(distances))
-                                if(distances[f_dist] < 0.1):
+                                if(distances[f_dist] < self.rectify_thresh):
                                     self.candidates[f_indexes[f_dist]]['boxes'].append(
                                         self.tracks[idx]['boxes'][-1])
                                     self.candidates[f_indexes[f_dist]]['timestamps'].append(
@@ -484,7 +486,7 @@ class SingleCameraTracker:
             i, j = np.unravel_index(
                 np.argmin(distance_matrix), distance_matrix.shape)
             dist = distance_matrix[i, j]
-            if dist < 0.1:
+            if dist < self.rectify_thresh:
                 self._concatenate_tracks(active_tracks_idx[indices_rows[i]],
                                          not_active_tracks_idx[indices_cols[j]])
                 distance_matrix = np.delete(distance_matrix, i, 0)
@@ -596,7 +598,7 @@ class SingleCameraTracker:
                             f_indexes = [nearest_idx_f,
                                          nearest_idx_avg, nearest_idx_clus]
                             f_dist = distances.index(min(distances))
-                            if(distances[f_dist] < 0.1):
+                            if(distances[f_dist] < self.rectify_thresh):
                                 self.candidates[f_indexes[f_dist]]['boxes'].append(
                                     self.tracks[-1]['boxes'][-1])
                                 self.candidates[f_indexes[f_dist]]['timestamps'].append(
@@ -678,7 +680,7 @@ class SingleCameraTracker:
                             f_indexes = [nearest_idx_f,
                                          nearest_idx_avg, nearest_idx_clus]
                             f_dist = distances.index(min(distances))
-                            if(distances[f_dist] < 0.1):
+                            if(distances[f_dist] < self.rectify_thresh):
                                 self.candidates[f_indexes[f_dist]]['boxes'].append(
                                     self.tracks[-1]['boxes'][-1])
                                 self.candidates[f_indexes[f_dist]]['timestamps'].append(
