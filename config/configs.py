@@ -37,13 +37,13 @@ class Config(DefaultConfig):
 
         self.sct_config = dict(
             time_window=10,
-            continue_time_thresh=3,
+            continue_time_thresh=10,
             track_clear_thresh=300,
             match_threshold=0.25,
             merge_thresh=0.15,
             n_clusters=4,
-            max_bbox_velocity=0.2,
-            rectify_thresh=0.08,
+            max_bbox_velocity=0.4,
+            rectify_thresh=0.085,
             detection_occlusion_thresh=0.7,
             track_detection_iou_thresh=0.5
         )
