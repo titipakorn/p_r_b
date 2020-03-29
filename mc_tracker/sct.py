@@ -252,7 +252,7 @@ class SingleCameraTracker:
                             if(len(self.candidates) > 0):
                                 list_curr_f = [feature['features'][-1]
                                                for feature in self.candidates]
-                                list_avg_f = [feature['avg_feature']
+                                list_avg_f = [feature[' ']
                                               for feature in self.candidates]
                                 list_clus_f = np.array([clusters_vec_distance(feature['f_cluster'], self.tracks[idx]['features'][-1])
                                                         for feature in self.candidates])
@@ -263,11 +263,11 @@ class SingleCameraTracker:
                                                         np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
                                 nearest_idx_avg = np.argmin(distances_avg_f)
                                 nearest_idx_clus = np.argmin(list_clus_f)
-                                distances = [
-                                    distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]]
+                                distances = np.array([
+                                    distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]])
                                 f_indexes = [nearest_idx_f,
                                              nearest_idx_avg, nearest_idx_clus]
-                                f_dist = distances.index(min(distances))
+                                f_dist = np.argmin(distances)
                                 if(distances[f_dist] < self.rectify_thresh):
                                     self.candidates[f_indexes[f_dist]]['boxes'].append(
                                         self.tracks[idx]['boxes'][-1])
@@ -344,11 +344,11 @@ class SingleCameraTracker:
                                                         np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
                                 nearest_idx_avg = np.argmin(distances_avg_f)
                                 nearest_idx_clus = np.argmin(list_clus_f)
-                                distances = [
-                                    distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]]
+                                distances = np.array([
+                                    distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]])
                                 f_indexes = [nearest_idx_f,
                                              nearest_idx_avg, nearest_idx_clus]
-                                f_dist = distances.index(min(distances))
+                                f_dist = np.argmin(distances)
                                 if(distances[f_dist] < self.rectify_thresh):
                                     self.candidates[f_indexes[f_dist]]['boxes'].append(
                                         self.tracks[idx]['boxes'][-1])
@@ -590,11 +590,11 @@ class SingleCameraTracker:
                                                     np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
                             nearest_idx_avg = np.argmin(distances_avg_f)
                             nearest_idx_clus = np.argmin(list_clus_f)
-                            distances = [
-                                distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]]
+                            distances = np.array([
+                                distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]])
                             f_indexes = [nearest_idx_f,
                                          nearest_idx_avg, nearest_idx_clus]
-                            f_dist = distances.index(min(distances))
+                            f_dist = np.argmin(distances)
                             if(distances[f_dist] < self.rectify_thresh):
                                 self.candidates[f_indexes[f_dist]]['boxes'].append(
                                     self.tracks[-1]['boxes'][-1])
@@ -671,11 +671,11 @@ class SingleCameraTracker:
                                                     np.array(list_avg_f).reshape(len(list_avg_f), -1), 'cosine')
                             nearest_idx_avg = np.argmin(distances_avg_f)
                             nearest_idx_clus = np.argmin(list_clus_f)
-                            distances = [
-                                distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]]
+                            distances = np.array([
+                                distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]])
                             f_indexes = [nearest_idx_f,
                                          nearest_idx_avg, nearest_idx_clus]
-                            f_dist = distances.index(min(distances))
+                            f_dist = np.argmin(distances)
                             if(distances[f_dist] < self.rectify_thresh):
                                 self.candidates[f_indexes[f_dist]]['boxes'].append(
                                     self.tracks[-1]['boxes'][-1])

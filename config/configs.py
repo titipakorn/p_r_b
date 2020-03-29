@@ -37,7 +37,7 @@ class Config(DefaultConfig):
 
         self.sct_config = dict(
             time_window=10,
-            continue_time_thresh=2,
+            continue_time_thresh=3,
             track_clear_thresh=300,
             match_threshold=0.25,
             merge_thresh=0.15,
