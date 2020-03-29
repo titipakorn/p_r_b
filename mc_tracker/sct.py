@@ -265,6 +265,7 @@ class SingleCameraTracker:
                                 nearest_idx_clus = np.argmin(list_clus_f)
                                 distances = np.array([
                                     distances_f[nearest_idx_f], distances_avg_f[nearest_idx_avg], list_clus_f[nearest_idx_clus]])
+                                print('distances::', distances)
                                 f_indexes = [nearest_idx_f,
                                              nearest_idx_avg, nearest_idx_clus]
                                 f_dist = np.argmin(distances)
