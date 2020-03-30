@@ -267,24 +267,24 @@ class SingleCameraTracker:
                                              filter_candidates[nearest_idx_avg], filter_candidates[nearest_idx_clus]]
                                 f_dist = np.argmin(distances)
                                 if(distances[f_dist] < self.rectify_thresh):
-                                    self.candidates[f_indexes[f_dist]]['boxes'].append(
-                                        self.tracks[idx]['boxes'][-1])
-                                    self.candidates[f_indexes[f_dist]]['timestamps'].append(
-                                        self.tracks[idx]['timestamps'][-1])
-                                    self.candidates[f_indexes[f_dist]]['features'].append(
-                                        self.tracks[idx]['features'][-1])
-                                    if self.tracks[idx]['features'][-1] is not None:
-                                        self.candidates[f_indexes[f_dist]]['f_cluster'].update(
-                                            features[i])
-                                        if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
-                                            self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
-                                                self.tracks[idx]['features'][-1].shape)
-                                        self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[idx]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
-                                            len(self.tracks[idx]
-                                                ['features'])
-                                    else:
-                                        self.candidates[f_indexes[f_dist]
-                                                        ]['avg_feature'] = None
+                                    # self.candidates[f_indexes[f_dist]]['boxes'].append(
+                                    #     self.tracks[idx]['boxes'][-1])
+                                    # self.candidates[f_indexes[f_dist]]['timestamps'].append(
+                                    #     self.tracks[idx]['timestamps'][-1])
+                                    # self.candidates[f_indexes[f_dist]]['features'].append(
+                                    #     self.tracks[idx]['features'][-1])
+                                    # if self.tracks[idx]['features'][-1] is not None:
+                                    #     self.candidates[f_indexes[f_dist]]['f_cluster'].update(
+                                    #         features[i])
+                                    #     if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
+                                    #         self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
+                                    #             self.tracks[idx]['features'][-1].shape)
+                                    #     self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[idx]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
+                                    #         len(self.tracks[idx]
+                                    #             ['features'])
+                                    # else:
+                                    #     self.candidates[f_indexes[f_dist]
+                                    #                     ]['avg_feature'] = None
                                     if(self.candidates[f_indexes[f_dist]]['out_status'] and self.candidates[f_indexes[f_dist]]['in_count'] is None):
                                         self.candidates[f_indexes[f_dist]
                                                         ]['in_count'] = 1
@@ -346,24 +346,24 @@ class SingleCameraTracker:
                                              filter_candidates[nearest_idx_avg], filter_candidates[nearest_idx_clus]]
                                 f_dist = np.argmin(distances)
                                 if(distances[f_dist] < self.rectify_thresh):
-                                    self.candidates[f_indexes[f_dist]]['boxes'].append(
-                                        self.tracks[idx]['boxes'][-1])
-                                    self.candidates[f_indexes[f_dist]]['timestamps'].append(
-                                        self.tracks[idx]['timestamps'][-1])
-                                    self.candidates[f_indexes[f_dist]]['features'].append(
-                                        self.tracks[idx]['features'][-1])
-                                    if self.tracks[idx]['features'][-1] is not None:
-                                        self.candidates[f_indexes[f_dist]]['f_cluster'].update(
-                                            features[i])
-                                        if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
-                                            self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
-                                                self.tracks[idx]['features'][-1].shape)
-                                        self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[idx]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
-                                            len(self.tracks[idx]
-                                                ['features'])
-                                    else:
-                                        self.candidates[f_indexes[f_dist]
-                                                        ]['avg_feature'] = None
+                                    # self.candidates[f_indexes[f_dist]]['boxes'].append(
+                                    #     self.tracks[idx]['boxes'][-1])
+                                    # self.candidates[f_indexes[f_dist]]['timestamps'].append(
+                                    #     self.tracks[idx]['timestamps'][-1])
+                                    # self.candidates[f_indexes[f_dist]]['features'].append(
+                                    #     self.tracks[idx]['features'][-1])
+                                    # if self.tracks[idx]['features'][-1] is not None:
+                                    #     self.candidates[f_indexes[f_dist]]['f_cluster'].update(
+                                    #         features[i])
+                                    #     if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
+                                    #         self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
+                                    #             self.tracks[idx]['features'][-1].shape)
+                                    #     self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[idx]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
+                                    #         len(self.tracks[idx]
+                                    #             ['features'])
+                                    # else:
+                                    #     self.candidates[f_indexes[f_dist]
+                                    #                     ]['avg_feature'] = None
                                     if(self.candidates[f_indexes[f_dist]]['in_status'] and self.candidates[f_indexes[f_dist]]['out_count'] is None):
                                         self.candidates[f_indexes[f_dist]
                                                         ]['out_count'] = 1
@@ -449,7 +449,7 @@ class SingleCameraTracker:
 
         clear_candidates = []
         for person in self.candidates:
-            if person['timestamps'][-1] < self.time - self.track_clear_thresh:
+            if person['timestamps'][-1] < self.time - self.track_clear_thresh/2:
                 continue
             if person['timestamps'][-1] < self.time - self.continue_time_thresh \
                     and len(person['timestamps']) < self.time_window:
@@ -590,24 +590,24 @@ class SingleCameraTracker:
                                          filter_candidates[nearest_idx_avg], filter_candidates[nearest_idx_clus]]
                             f_dist = np.argmin(distances)
                             if(distances[f_dist] < self.rectify_thresh):
-                                self.candidates[f_indexes[f_dist]]['boxes'].append(
-                                    self.tracks[-1]['boxes'][-1])
-                                self.candidates[f_indexes[f_dist]]['timestamps'].append(
-                                    self.tracks[-1]['timestamps'][-1])
-                                self.candidates[f_indexes[f_dist]]['features'].append(
-                                    self.tracks[-1]['features'][-1])
-                                if self.tracks[-1]['features'][-1] is not None:
-                                    self.candidates[f_indexes[f_dist]]['f_cluster'].update(
-                                        features[i])
-                                    if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
-                                        self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
-                                            self.tracks[-1]['features'][-1].shape)
-                                    self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[-1]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
-                                        len(self.tracks[-1]
-                                            ['features'])
-                                else:
-                                    self.candidates[f_indexes[f_dist]
-                                                    ]['avg_feature'] = None
+                                # self.candidates[f_indexes[f_dist]]['boxes'].append(
+                                #     self.tracks[-1]['boxes'][-1])
+                                # self.candidates[f_indexes[f_dist]]['timestamps'].append(
+                                #     self.tracks[-1]['timestamps'][-1])
+                                # self.candidates[f_indexes[f_dist]]['features'].append(
+                                #     self.tracks[-1]['features'][-1])
+                                # if self.tracks[-1]['features'][-1] is not None:
+                                #     self.candidates[f_indexes[f_dist]]['f_cluster'].update(
+                                #         features[i])
+                                #     if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
+                                #         self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
+                                #             self.tracks[-1]['features'][-1].shape)
+                                #     self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[-1]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
+                                #         len(self.tracks[-1]
+                                #             ['features'])
+                                # else:
+                                #     self.candidates[f_indexes[f_dist]
+                                #                     ]['avg_feature'] = None
                                 if(self.candidates[f_indexes[f_dist]]['out_status'] and self.candidates[f_indexes[f_dist]]['in_count'] is None):
                                     self.candidates[f_indexes[f_dist]
                                                     ]['in_count'] = 1
@@ -669,24 +669,24 @@ class SingleCameraTracker:
                                          filter_candidates[nearest_idx_avg], filter_candidates[nearest_idx_clus]]
                             f_dist = np.argmin(distances)
                             if(distances[f_dist] < self.rectify_thresh):
-                                self.candidates[f_indexes[f_dist]]['boxes'].append(
-                                    self.tracks[-1]['boxes'][-1])
-                                self.candidates[f_indexes[f_dist]]['timestamps'].append(
-                                    self.tracks[-1]['timestamps'][-1])
-                                self.candidates[f_indexes[f_dist]]['features'].append(
-                                    self.tracks[-1]['features'][-1])
-                                if self.tracks[-1]['features'][-1] is not None:
-                                    self.candidates[f_indexes[f_dist]]['f_cluster'].update(
-                                        features[i])
-                                    if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
-                                        self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
-                                            self.tracks[-1]['features'][-1].shape)
-                                    self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[-1]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
-                                        len(self.tracks[-1]
-                                            ['features'])
-                                else:
-                                    self.candidates[f_indexes[f_dist]
-                                                    ]['avg_feature'] = None
+                                # self.candidates[f_indexes[f_dist]]['boxes'].append(
+                                #     self.tracks[-1]['boxes'][-1])
+                                # self.candidates[f_indexes[f_dist]]['timestamps'].append(
+                                #     self.tracks[-1]['timestamps'][-1])
+                                # self.candidates[f_indexes[f_dist]]['features'].append(
+                                #     self.tracks[-1]['features'][-1])
+                                # if self.tracks[-1]['features'][-1] is not None:
+                                #     self.candidates[f_indexes[f_dist]]['f_cluster'].update(
+                                #         features[i])
+                                #     if self.candidates[f_indexes[f_dist]]['avg_feature'] is None:
+                                #         self.candidates[f_indexes[f_dist]]['avg_feature'] = np.zeros(
+                                #             self.tracks[-1]['features'][-1].shape)
+                                #     self.candidates[f_indexes[f_dist]]['avg_feature'] += (self.tracks[-1]['features'][-1] - self.candidates[f_indexes[f_dist]]['avg_feature']) / \
+                                #         len(self.tracks[-1]
+                                #             ['features'])
+                                # else:
+                                #     self.candidates[f_indexes[f_dist]
+                                #                     ]['avg_feature'] = None
                                 if(self.candidates[f_indexes[f_dist]]['in_status'] and self.candidates[f_indexes[f_dist]]['out_count'] is None):
                                     self.candidates[f_indexes[f_dist]
                                                     ]['out_count'] = 1
