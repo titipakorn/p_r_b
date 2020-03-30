@@ -360,16 +360,16 @@ class SingleCameraTracker:
                                     else:
                                         self.candidates[f_indexes[f_dist]
                                                         ]['avg_feature'] = None
-                                    if(self.candidates[f_indexes[f_dist]]['out_status'] and self.candidates[f_indexes[f_dist]]['in_count'] is None):
+                                    if(self.candidates[f_indexes[f_dist]]['in_status'] and self.candidates[f_indexes[f_dist]]['out_count'] is None):
                                         self.candidates[f_indexes[f_dist]
-                                                        ]['in_count'] = 1
+                                                        ]['out_count'] = 1
                                         img = Image.open(frames[i].file)
                                         img.save(
-                                            "extract_person/IN_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
-                                        SingleCameraTracker.COUNT_IN += 1
+                                            "extract_person/OUT_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
+                                        SingleCameraTracker.COUNT_OUT += 1
                                     else:
                                         self.candidates[f_indexes[f_dist]
-                                                        ]['in_status'] = True
+                                                        ]['out_status'] = True
                                         c_out_temp = -1
                                 else:
                                     for track2 in self.candidates:
@@ -679,16 +679,16 @@ class SingleCameraTracker:
                                 else:
                                     self.candidates[f_indexes[f_dist]
                                                     ]['avg_feature'] = None
-                                if(self.candidates[f_indexes[f_dist]]['out_status'] and self.candidates[f_indexes[f_dist]]['in_count'] is None):
+                                if(self.candidates[f_indexes[f_dist]]['in_status'] and self.candidates[f_indexes[f_dist]]['out_count'] is None):
                                     self.candidates[f_indexes[f_dist]
-                                                    ]['in_count'] = 1
+                                                    ]['out_count'] = 1
                                     img = Image.open(frames[i].file)
                                     img.save(
-                                        "extract_person/IN_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
-                                    SingleCameraTracker.COUNT_IN += 1
+                                        "extract_person/OUT_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
+                                    SingleCameraTracker.COUNT_OUT += 1
                                 else:
                                     self.candidates[f_indexes[f_dist]
-                                                    ]['in_status'] = True
+                                                    ]['out_status'] = True
                                     c_out_temp = -1
                             else:
                                 for track2 in self.candidates:
