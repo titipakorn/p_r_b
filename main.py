@@ -94,8 +94,8 @@ async def update_track(bboxes: str = Body(..., embed=True), files: List[UploadFi
     # for i, f in enumerate(files):
     #     b_name = "_".join(map(str, d_bboxes[i]))
     #     Image.open(f.file).save(f"raw_data/{time_str}_{b_name}.jpg")
-    tracker.process([[cv2.imdecode(np.fromstring(im.file, np.uint8),
-                                   cv2.IMREAD_COLOR) for im in files]], [d_bboxes])
+    tracker.process([[cv2.imdecode(np.fromstring(
+        im.file.read(), np.uint8), cv2.IMREAD_COLOR) for im in files]], [d_bboxes])
     return {"status": 'success'}
 
 
