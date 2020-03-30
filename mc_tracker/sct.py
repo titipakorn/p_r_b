@@ -288,9 +288,8 @@ class SingleCameraTracker:
                                     if(self.candidates[f_indexes[f_dist]]['out_status'] and self.candidates[f_indexes[f_dist]]['in_count'] is None):
                                         self.candidates[f_indexes[f_dist]
                                                         ]['in_count'] = 1
-                                        img = Image.open(frames[i].file)
-                                        img.save(
-                                            "extract_person/IN_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
+                                        cv2.imwrite("extract_person/IN_{}.jpg".format(
+                                            self.time+self.candidates[f_indexes[f_dist]]['id']), frames[i])
                                         SingleCameraTracker.COUNT_IN += 1
                                     else:
                                         self.candidates[f_indexes[f_dist]
@@ -367,9 +366,8 @@ class SingleCameraTracker:
                                     if(self.candidates[f_indexes[f_dist]]['in_status'] and self.candidates[f_indexes[f_dist]]['out_count'] is None):
                                         self.candidates[f_indexes[f_dist]
                                                         ]['out_count'] = 1
-                                        img = Image.open(frames[i].file)
-                                        img.save(
-                                            "extract_person/OUT_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
+                                        cv2.imwrite("extract_person/OUT_{}.jpg".format(
+                                            self.time+self.candidates[f_indexes[f_dist]]['id']), frames[i])
                                         SingleCameraTracker.COUNT_OUT += 1
                                     else:
                                         self.candidates[f_indexes[f_dist]
@@ -611,9 +609,8 @@ class SingleCameraTracker:
                                 if(self.candidates[f_indexes[f_dist]]['out_status'] and self.candidates[f_indexes[f_dist]]['in_count'] is None):
                                     self.candidates[f_indexes[f_dist]
                                                     ]['in_count'] = 1
-                                    img = Image.open(frames[i].file)
-                                    img.save(
-                                        "extract_person/IN_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
+                                    cv2.imwrite("extract_person/IN_{}.jpg".format(
+                                        self.time+self.candidates[f_indexes[f_dist]]['id']), frames[i])
                                     SingleCameraTracker.COUNT_IN += 1
                                 else:
                                     self.candidates[f_indexes[f_dist]
@@ -690,9 +687,8 @@ class SingleCameraTracker:
                                 if(self.candidates[f_indexes[f_dist]]['in_status'] and self.candidates[f_indexes[f_dist]]['out_count'] is None):
                                     self.candidates[f_indexes[f_dist]
                                                     ]['out_count'] = 1
-                                    img = Image.open(frames[i].file)
-                                    img.save(
-                                        "extract_person/OUT_{}.jpg".format(self.time+self.candidates[f_indexes[f_dist]]['id']))
+                                    cv2.imwrite("extract_person/OUT_{}.jpg".format(
+                                        self.time+self.candidates[f_indexes[f_dist]]['id']), frames[i])
                                     SingleCameraTracker.COUNT_OUT += 1
                                 else:
                                     self.candidates[f_indexes[f_dist]
@@ -815,8 +811,7 @@ class SingleCameraTracker:
         if images:
             with torch.no_grad():
                 img = torch.cat(
-                    [self.data_transform(Image.open(img.file).convert(
-                        'RGB')).unsqueeze(0) for img in images], dim=0).float().to("cuda")
+                    [self.data_transform(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)).unsqueeze(0) for img in images], dim=0).float().to("cuda")
                 embeddings = self.reid_model.forward(img)
             return embeddings.cpu().numpy()
         else:
