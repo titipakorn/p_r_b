@@ -469,7 +469,7 @@ class SingleCameraTracker:
         for i, idx1 in enumerate(active_tracks_idx):
             for j, idx2 in enumerate(not_active_tracks_idx):
                 distance_matrix[i, j] = self._get_rectification_distance(
-                    self.tracks[idx1], self.tracks[idx2])
+                    self.candidates[idx1], self.candidates[idx2])
 
         indices_rows = np.arange(distance_matrix.shape[0])
         indices_cols = np.arange(distance_matrix.shape[1])
@@ -479,8 +479,8 @@ class SingleCameraTracker:
                 np.argmin(distance_matrix), distance_matrix.shape)
             dist = distance_matrix[i, j]
             if dist < self.rectify_thresh:
-                self._concatenate_tracks(active_tracks_idx[indices_rows[i]],
-                                         not_active_tracks_idx[indices_cols[j]])
+                self._concatenate_tracks(self.candidates[active_tracks_idx[indices_rows[i]]],
+                                         self.candidates[not_active_tracks_idx[indices_cols[j]]])
                 distance_matrix = np.delete(distance_matrix, i, 0)
                 indices_rows = np.delete(indices_rows, i)
                 distance_matrix = np.delete(distance_matrix, j, 1)
