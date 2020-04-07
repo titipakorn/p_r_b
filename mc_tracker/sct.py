@@ -447,11 +447,11 @@ class SingleCameraTracker:
 
         clear_candidates = []
         for person in self.candidates:
-            if person['timestamps'][-1] < self.time - self.track_clear_thresh/2:
+            if person['timestamps'][-1] < self.time - self.track_clear_thresh:
                 continue
-            if person['timestamps'][-1] < self.time - self.continue_time_thresh \
-                    and len(person['timestamps']) < self.time_window:
-                continue
+            # if person['timestamps'][-1] < self.time - self.continue_time_thresh \
+            #         and len(person['timestamps']) < self.time_window:
+            #     continue
             clear_candidates.append(person)
         self.candidates = clear_candidates
         # Clear Candidates
