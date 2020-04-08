@@ -35,7 +35,8 @@ app = FastAPI()
 number_of_cameras = 1
 
 reid = VectorCNN(config)
-tracker = MultiCameraTracker(number_of_cameras, reid, config)
+global tracker
+tracker = {}
 
 
 class RepeatTimer(Timer):
@@ -46,17 +47,18 @@ class RepeatTimer(Timer):
 
 def update_db():
     try:
-        global parsed_date, parsed_time
+        global parsed_date, parsed_time, tracker
         d, t = datetime.now().strftime("%Y-%m-%d/%H:00:00").split('/')
         if(t != parsed_time):
-            url = 'http://52.74.221.188/api/insert.php'
-            myobj = {'secure_code': (None, 'P4ssw0rd!'),
-                     'sql': (None, json.dumps({'table': 'counting', 'values': {'counting_date': parsed_date, 'counting_time': parsed_time, 'counting_in': SingleCameraTracker.COUNT_IN, 'counting_out': SingleCameraTracker.COUNT_OUT, 'branch_id': 2}}))}
-            requests.post(url, files=myobj)
-            parsed_date = d
-            parsed_time = t
-            SingleCameraTracker.COUNT_IN = 0
-            SingleCameraTracker.COUNT_OUT = 0
+            for branch_id in tracker:
+                url = 'http://52.74.221.188/api/insert.php'
+                myobj = {'secure_code': (None, 'P4ssw0rd!'),
+                         'sql': (None, json.dumps({'table': 'counting', 'values': {'counting_date': parsed_date, 'counting_time': parsed_time, 'counting_in': tracker[branch_id].scts[0].COUNT_IN, 'counting_out': tracker[branch_id].scts[0].COUNT_OUT, 'branch_id': branch_id}}))}
+                requests.post(url, files=myobj)
+                parsed_date = d
+                parsed_time = t
+                tracker[branch_id].scts[0].COUNT_IN = 0
+                tracker[branch_id].scts[0].OUNT_OUT = 0
 
     except:
         print('no internet')
@@ -72,29 +74,28 @@ if not os.path.exists('./raw_data'):
     os.makedirs('raw_data')
 
 
-@app.get("/status/")
-def read_status():
-    global parsed_date, parsed_time
-    return {"counting_in": SingleCameraTracker.COUNT_IN, "counting_out": SingleCameraTracker.COUNT_OUT, "date": parsed_date, "time": parsed_time}
+@app.get("/status/{branch_id}")
+def read_status(branch_id: int):
+    global parsed_date, parsed_time, tracker
+    return {"counting_in": tracker[branch_id].scts[0].COUNT_IN, "counting_out": tracker[branch_id].scts[0].COUNT_OUT, "date": parsed_date, "time": parsed_time}
 
 
-@app.get("/reset/")
+@app.get("/clear/")
 def reset():
-    SingleCameraTracker.COUNT_IN = 0
-    SingleCameraTracker.COUNT_OUT = 0
-    tracker = MultiCameraTracker(number_of_cameras, reid, config)
+    global tracker
+    tracker = {}
     torch.cuda.empty_cache()
     return {"status": "success"}
 
 
-@app.post("/track/")
-async def update_track(bboxes: str = Body(..., embed=True), files: List[UploadFile] = File(...)):
-    #time_str = time.strftime(TIME_FM)
+@app.post("/track/{branch_id}")
+async def update_track(branch_id: int, bboxes: str = Body(..., embed=True), files: List[UploadFile] = File(...)):
+    global tracker
+    if(branch_id not in tracker):
+        tracker[branch_id] = MultiCameraTracker(
+            number_of_cameras, reid, config)
     d_bboxes = json.loads(bboxes)
-    # for i, f in enumerate(files):
-    #     b_name = "_".join(map(str, d_bboxes[i]))
-    #     Image.open(f.file).save(f"raw_data/{time_str}_{b_name}.jpg")
-    tracker.process([[cv2.imdecode(np.fromstring(
+    tracker[branch_id].process([[cv2.imdecode(np.fromstring(
         im.file.read(), np.uint8), cv2.IMREAD_COLOR) for im in files]], [d_bboxes])
     return {"status": 'success'}
 

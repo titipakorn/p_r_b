@@ -97,9 +97,6 @@ def convert_polygon(json):
 
 
 class SingleCameraTracker:
-    COUNT_IN = 0
-    COUNT_OUT = 0
-
     def __init__(self, id, global_id_getter, global_id_releaser,
                  reid_model=None,
                  time_window=10,
@@ -121,6 +118,8 @@ class SingleCameraTracker:
         self.tracks = []
         self.history_tracks = []
         self.time = 0
+        self.COUNT_IN = 0
+        self.COUNT_OUT = 0
         self.candidates = []
         self.time_window = time_window
         self.continue_time_thresh = continue_time_thresh
@@ -252,7 +251,7 @@ class SingleCameraTracker:
                     if(current_point.within(self.in_poly)):
                         if(self.tracks[idx]['in_status'] == False):
                             self.tracks[idx]['in_status'] = True
-                            c_in_temp = SingleCameraTracker.COUNT_IN
+                            c_in_temp = self.COUNT_IN
                             filter_candidates = [i for i, c in enumerate(self.candidates) if self.tracks[idx]['timestamps'][0] > c['timestamps'][-1]
                                                  or c['timestamps'][0] > self.tracks[idx]['timestamps'][-1]]
                             if(len(filter_candidates) > 0):
@@ -294,7 +293,7 @@ class SingleCameraTracker:
                                                         ]['in_count'] = 1
                                         cv2.imwrite("extract_person/IN_{}.jpg".format(
                                             self.time+self.candidates[f_indexes[f_dist]]['id']), frames[i])
-                                        SingleCameraTracker.COUNT_IN += 1
+                                        self.COUNT_IN += 1
                                     else:
                                         self.candidates[f_indexes[f_dist]
                                                         ]['in_status'] = True
@@ -324,13 +323,13 @@ class SingleCameraTracker:
                                                 track2['in_status'] = True
                                                 c_in_temp = -1
                                                 break
-                            if(c_in_temp == SingleCameraTracker.COUNT_IN):
+                            if(c_in_temp == self.COUNT_IN):
                                 self.candidates.append(
                                     copy(self.tracks[idx]))
                     if(current_point.within(self.out_poly)):
                         if(self.tracks[idx]['out_status'] == False):
                             self.tracks[idx]['out_status'] = True
-                            c_out_temp = SingleCameraTracker.COUNT_OUT
+                            c_out_temp = self.COUNT_OUT
                             filter_candidates = [i for i, c in enumerate(self.candidates) if self.tracks[idx]['timestamps'][0] > c['timestamps'][-1]
                                                  or c['timestamps'][0] > self.tracks[idx]['timestamps'][-1]]
                             if(len(filter_candidates) > 0):
@@ -372,7 +371,7 @@ class SingleCameraTracker:
                                                         ]['out_count'] = 1
                                         cv2.imwrite("extract_person/OUT_{}.jpg".format(
                                             self.time+self.candidates[f_indexes[f_dist]]['id']), frames[i])
-                                        SingleCameraTracker.COUNT_OUT += 1
+                                        self.COUNT_OUT += 1
                                     else:
                                         self.candidates[f_indexes[f_dist]
                                                         ]['out_status'] = True
@@ -402,7 +401,7 @@ class SingleCameraTracker:
                                                 track2['in_status'] = True
                                                 c_out_temp = -1
                                                 break
-                            if(c_out_temp == SingleCameraTracker.COUNT_OUT):
+                            if(c_out_temp == self.COUNT_OUT):
                                 self.candidates.append(
                                     copy(self.tracks[idx]))
 
@@ -610,7 +609,7 @@ class SingleCameraTracker:
                 if(current_point.within(self.in_poly)):
                     if(self.tracks[-1]['in_status'] == False):
                         self.tracks[-1]['in_status'] = True
-                        c_in_temp = SingleCameraTracker.COUNT_IN
+                        c_in_temp = self.COUNT_IN
                         filter_candidates = [i for i, c in enumerate(self.candidates) if self.tracks[-1]['timestamps'][0] > c['timestamps'][-1]
                                              or c['timestamps'][0] > self.tracks[-1]['timestamps'][-1]]
                         if(len(filter_candidates) > 0):
@@ -652,7 +651,7 @@ class SingleCameraTracker:
                                                     ]['in_count'] = 1
                                     cv2.imwrite("extract_person/IN_{}.jpg".format(
                                         self.time+self.candidates[f_indexes[f_dist]]['id']), frames[i])
-                                    SingleCameraTracker.COUNT_IN += 1
+                                    self.COUNT_IN += 1
                                 else:
                                     self.candidates[f_indexes[f_dist]
                                                     ]['in_status'] = True
@@ -682,13 +681,13 @@ class SingleCameraTracker:
                                             track2['in_status'] = True
                                             c_in_temp = -1
                                             break
-                        if(c_in_temp == SingleCameraTracker.COUNT_IN):
+                        if(c_in_temp == self.COUNT_IN):
                             self.candidates.append(
                                 copy(self.tracks[-1]))
                 if(current_point.within(self.out_poly)):
                     if(self.tracks[-1]['out_status'] == False):
                         self.tracks[-1]['out_status'] = True
-                        c_out_temp = SingleCameraTracker.COUNT_OUT
+                        c_out_temp = self.COUNT_OUT
                         filter_candidates = [i for i, c in enumerate(self.candidates) if self.tracks[-1]['timestamps'][0] > c['timestamps'][-1]
                                              or c['timestamps'][0] > self.tracks[-1]['timestamps'][-1]]
                         if(len(filter_candidates) > 0):
@@ -730,7 +729,7 @@ class SingleCameraTracker:
                                                     ]['out_count'] = 1
                                     cv2.imwrite("extract_person/OUT_{}.jpg".format(
                                         self.time+self.candidates[f_indexes[f_dist]]['id']), frames[i])
-                                    SingleCameraTracker.COUNT_OUT += 1
+                                    self.COUNT_OUT += 1
                                 else:
                                     self.candidates[f_indexes[f_dist]
                                                     ]['out_status'] = True
@@ -760,7 +759,7 @@ class SingleCameraTracker:
                                             track2['in_status'] = True
                                             c_out_temp = -1
                                             break
-                        if(c_out_temp == SingleCameraTracker.COUNT_OUT):
+                        if(c_out_temp == self.COUNT_OUT):
                             self.candidates.append(
                                 copy(self.tracks[-1]))
 
