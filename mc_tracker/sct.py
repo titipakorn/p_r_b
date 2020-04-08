@@ -849,11 +849,17 @@ class SingleCameraTracker:
     def _get_embeddings(self, images, mask=None):
         embeddings = np.array([])
         if images:
+            img_feature = []
             with torch.no_grad():
-                img = torch.cat(
-                    [self.data_transform(Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))).unsqueeze(0) for img in images], dim=0).float().to("cuda")
-                embeddings = self.reid_model.forward(img)
-            return embeddings.cpu().numpy()
+                for img in images:
+                    img = torch.cat([self.data_transform(Image.fromarray(
+                        cv2.cvtColor(img, cv2.COLOR_BGR2RGB)))], dim=0).float().to("cuda")
+                    img_feature.append(
+                        self.reid_model.forward(img).cpu().numpy())
+                # img = torch.cat(
+                #     [self.data_transform(Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))).unsqueeze(0) for img in images], dim=0).float().to("cuda")
+                # embeddings = self.reid_model.forward(img)
+            return np.array(img_feature)
         else:
             return embeddings
 
