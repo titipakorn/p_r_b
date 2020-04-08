@@ -132,6 +132,8 @@ class SingleCameraTracker:
         self.max_bbox_velocity = max_bbox_velocity
         self.detection_occlusion_thresh = detection_occlusion_thresh
         self.track_detection_iou_thresh = track_detection_iou_thresh
+        self.rectify_time_thresh = self.continue_time_thresh * 4
+        self.rectify_length_thresh = self.time_window // 2
         self.data_transform = transforms.Compose([
             transforms.Resize([64, 128]),
             transforms.ToTensor(),
@@ -146,9 +148,11 @@ class SingleCameraTracker:
             reid_features = self._get_embeddings(images, mask)
 
         assignment = self._continue_tracks(images, detections, reid_features)
-        if self.time % 2 == 0:
-            self._create_new_tracks(
-                images, detections, reid_features, assignment)
+        self._create_new_tracks(
+            images, detections, reid_features, assignment)
+        self._clear_old_tracks()
+        self._rectify_tracks()
+        if self.time % self.time_window == 0:
             self._merge_tracks()
         self.time += 1
 
@@ -429,7 +433,7 @@ class SingleCameraTracker:
                 track1['f_cluster'], track2['f_cluster'])
         return THE_BIGGEST_DISTANCE
 
-    def _merge_tracks(self):
+    def _clear_old_tracks(self):
         clear_tracks = []
         for track in self.tracks:
             # remove too old tracks
@@ -444,6 +448,43 @@ class SingleCameraTracker:
                 continue
             clear_tracks.append(track)
         self.tracks = clear_tracks
+
+    def _rectify_tracks(self):
+        active_tracks_idx = []
+        not_active_tracks_idx = []
+        for i, track in enumerate(self.tracks):
+            if track['timestamps'][-1] >= self.time - self.rectify_time_thresh \
+                    and len(track) >= self.rectify_length_thresh:
+                active_tracks_idx.append(i)
+            elif len(track) >= self.rectify_length_thresh:
+                not_active_tracks_idx.append(i)
+
+        distance_matrix = np.zeros((len(active_tracks_idx),
+                                    len(not_active_tracks_idx)), dtype=np.float32)
+        for i, idx1 in enumerate(active_tracks_idx):
+            for j, idx2 in enumerate(not_active_tracks_idx):
+                distance_matrix[i, j] = self._get_rectification_distance(
+                    self.tracks[idx1], self.tracks[idx2])
+
+        indices_rows = np.arange(distance_matrix.shape[0])
+        indices_cols = np.arange(distance_matrix.shape[1])
+
+        while len(indices_rows) > 0 and len(indices_cols) > 0:
+            i, j = np.unravel_index(
+                np.argmin(distance_matrix), distance_matrix.shape)
+            dist = distance_matrix[i, j]
+            if dist < self.rectify_thresh:
+                self._concatenate_tracks(self.tracks[active_tracks_idx[indices_rows[i]]],
+                                         self.tracks[not_active_tracks_idx[indices_cols[j]]])
+                distance_matrix = np.delete(distance_matrix, i, 0)
+                indices_rows = np.delete(indices_rows, i)
+                distance_matrix = np.delete(distance_matrix, j, 1)
+                indices_cols = np.delete(indices_cols, j)
+            else:
+                break
+        self.tracks = list(filter(None, self.tracks))
+
+    def _merge_tracks(self):
 
         clear_candidates = []
         for person in self.candidates:
