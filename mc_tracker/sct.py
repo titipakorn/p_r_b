@@ -847,9 +847,8 @@ class SingleCameraTracker:
         return intersecion / m if m > 0 else 0
 
     def _get_embeddings(self, images, mask=None):
-        embeddings = np.array([])
+        img_feature = []
         if images:
-            img_feature = []
             with torch.no_grad():
                 for img in images:
                     img = torch.cat([self.data_transform(Image.fromarray(
@@ -859,9 +858,9 @@ class SingleCameraTracker:
                 # img = torch.cat(
                 #     [self.data_transform(Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))).unsqueeze(0) for img in images], dim=0).float().to("cuda")
                 # embeddings = self.reid_model.forward(img)
-            return np.array(img_feature)
+            return img_feature
         else:
-            return embeddings
+            return img_feature
 
     def _merge_clustered_features(self, clusters1, clusters2, features1, features2):
         if len(features1) >= len(features2):
