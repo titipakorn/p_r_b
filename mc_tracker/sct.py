@@ -853,7 +853,7 @@ class SingleCameraTracker:
                 list_f = []
                 for ima in images:
                     img = self.data_transform(Image.fromarray(cv2.cvtColor(
-                        ima, cv2.COLOR_BGR2RGB))).unsqueeze(0).float().to("cuda")
+                        ima, cv2.COLOR_BGR2RGB))).float().unsqueeze(0).cuda()
                     f_img = self.reid_model.forward(img).cpu().numpy()
                     list_f.append(f_img)
             #     img = torch.cat(
